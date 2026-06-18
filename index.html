@@ -428,7 +428,9 @@ const WMAP = {
   skyrend:"sky_glaive",
   tuskmaul:"tusk_club",
   sunfang:"sun_claws",
-  chillbert:"ice_hammer"
+  chillbert:"ice_hammer",
+  brdysh:"bone_gauntlets",
+  cheremsha:"thorn_knuckles"
 };
 const PLACE = {
   pando:{hx:0.72,hy:0.61,scale:0.364,rot:-8},
@@ -450,7 +452,9 @@ const PLACE = {
   skyrend:{hx:0.78,hy:0.59,scale:0.434,rot:-8},
   tuskmaul:{hx:0.74,hy:0.65,scale:0.336,rot:-6},
   sunfang:{hx:0.52,hy:0.67,scale:0.28,rot:0},
-  chillbert:{hx:0.76,hy:0.65,scale:0.336,rot:-8}
+  chillbert:{hx:0.76,hy:0.65,scale:0.336,rot:-8},
+  brdysh:{hx:0.5,hy:0.69,scale:0.28,rot:0},
+  cheremsha:{hx:0.5,hy:0.69,scale:0.28,rot:0}
 };
 const GRIP = {
   bamboo_staff:{gx:0.5,gy:0.85},
@@ -496,7 +500,9 @@ const SHIELD_NAME = {
   skyrend:"Крылатый щит",
   tuskmaul:"Бивневый щит",
   sunfang:"Солнечный клык",
-  chillbert:"Ледяной баклер"
+  chillbert:"Ледяной баклер",
+  brdysh:"Дубовый щит",
+  cheremsha:"Луковый вард"
 };
 const ARMOR_NAME = {
   pando:"Набор лесного разведчика",
@@ -518,7 +524,9 @@ const ARMOR_NAME = {
   skyrend:"Регалии стража бурь",
   tuskmaul:"Сбруя мамонта",
   sunfang:"Золотой набор",
-  chillbert:"Снежный наряд"
+  chillbert:"Снежный наряд",
+  brdysh:"Бронегруз",
+  cheremsha:"Травяной доспех"
 };
 const GEAR_COST = {armor:240, shield:140};
 const GEAR_BONUS = {armor:{def:8, hp:30, atk:2}, shield:{def:6, hp:12}};
@@ -551,6 +559,8 @@ const ANIMALS = {
   tuskmaul:{emoji:"🦣", name:"Тускмол", tag:"Мамонт-крушитель", atk:16, def:14, hp:135, spd:5, special:"Бивневая Дубина", sdesc:"удар с оглушением"},
   sunfang:{emoji:"🐅", name:"Санфанг", tag:"Солнечный тигр", atk:16, def:11, hp:110, spd:12, special:"Солнечные Когти", sdesc:"серия когтей"},
   chillbert:{emoji:"⛄", name:"Чиллберт", tag:"Ледяной голем", atk:13, def:15, hp:130, spd:6, special:"Ледяной Молот", sdesc:"сокрушает льдом"},
+  brdysh:{emoji:"🦬", name:"Брдыш", tag:"Лесной громила", atk:15, def:14, hp:140, spd:5, special:"Брдыщ-Удар", sdesc:"сокрушительный таран с оглушением"},
+  cheremsha:{emoji:"🌿", name:"Черёмша", tag:"Дикий чеснок", atk:12, def:10, hp:100, spd:12, special:"Чесночный Дух", sdesc:"ядовитое облако чеснока"},
 };
 
 /* ---------- оружие ---------- */
@@ -566,21 +576,23 @@ const WEAPONS = {
 
 /* ---------- лестница соперников ---------- */
 const LADDER = [
-  {pos:"#20", name:"Сэйблвифф", a:"sablewhiff", lvl:0, coins:40, rep:8},
-  {pos:"#19", name:"Каприон", a:"caprion", lvl:1, coins:56, rep:10},
-  {pos:"#18", name:"Квиллспайк", a:"quillspike", lvl:2, coins:72, rep:12},
-  {pos:"#17", name:"Глеамара", a:"gleamara", lvl:3, coins:88, rep:14},
-  {pos:"#16", name:"Никсшейд", a:"nyxshade", lvl:4, coins:104, rep:16},
-  {pos:"#15", name:"Вулгрейв", a:"wulgrave", lvl:5, coins:120, rep:18},
-  {pos:"#14", name:"Пандо", a:"pando", lvl:5, coins:120, rep:18},
-  {pos:"#13", name:"Скайренд", a:"skyrend", lvl:6, coins:136, rep:20},
-  {pos:"#12", name:"Бракко", a:"brakko", lvl:6, coins:136, rep:20},
-  {pos:"#11", name:"Фростмузл", a:"frostmuzzle", lvl:7, coins:152, rep:22},
-  {pos:"#10", name:"Санфанг", a:"sunfang", lvl:7, coins:152, rep:22},
-  {pos:"#9", name:"Майрджо", a:"mirejaw", lvl:8, coins:168, rep:24},
-  {pos:"#8", name:"Торнмус", a:"thornmoose", lvl:8, coins:168, rep:24},
+  {pos:"#22", name:"Сэйблвифф", a:"sablewhiff", lvl:0, coins:40, rep:8},
+  {pos:"#21", name:"Каприон", a:"caprion", lvl:1, coins:56, rep:10},
+  {pos:"#20", name:"Черёмша", a:"cheremsha", lvl:2, coins:70, rep:12},
+  {pos:"#19", name:"Квиллспайк", a:"quillspike", lvl:2, coins:80, rep:13},
+  {pos:"#18", name:"Глеамара", a:"gleamara", lvl:3, coins:90, rep:14},
+  {pos:"#17", name:"Никсшейд", a:"nyxshade", lvl:4, coins:104, rep:16},
+  {pos:"#16", name:"Вулгрейв", a:"wulgrave", lvl:5, coins:118, rep:18},
+  {pos:"#15", name:"Пандо", a:"pando", lvl:5, coins:120, rep:18},
+  {pos:"#14", name:"Скайренд", a:"skyrend", lvl:6, coins:134, rep:20},
+  {pos:"#13", name:"Бракко", a:"brakko", lvl:6, coins:136, rep:20},
+  {pos:"#12", name:"Фростмузл", a:"frostmuzzle", lvl:7, coins:150, rep:22},
+  {pos:"#11", name:"Санфанг", a:"sunfang", lvl:7, coins:152, rep:22},
+  {pos:"#10", name:"Майрджо", a:"mirejaw", lvl:8, coins:166, rep:24},
+  {pos:"#9", name:"Торнмус", a:"thornmoose", lvl:8, coins:168, rep:24},
+  {pos:"#8", name:"Брдыш", a:"brdysh", lvl:9, coins:180, rep:26},
   {pos:"#7", name:"Румбрут", a:"rumbrute", lvl:9, coins:184, rep:26},
-  {pos:"#6", name:"Грумхорн", a:"grumhorn", lvl:9, coins:184, rep:26},
+  {pos:"#6", name:"Грумхорн", a:"grumhorn", lvl:10, coins:198, rep:28},
   {pos:"#5", name:"Пиродрейк", a:"pyrodrake", lvl:10, coins:200, rep:28},
   {pos:"#4", name:"Моссрекс", a:"mossrex", lvl:11, coins:216, rep:30},
   {pos:"#3", name:"Чиллберт", a:"chillbert", lvl:11, coins:216, rep:30},
@@ -634,7 +646,8 @@ const NAT_WEAPON = {
   pando:"🥢", thornmoose:"🦌", gleamara:"🔮", grumhorn:"🛡️", aurelion:"🌞",
   brakko:"🪝", rumbrute:"🦴", sablewhiff:"🌙", caprion:"🗡️", nyxshade:"🐾",
   wulgrave:"🗡️", quillspike:"🌵", frostmuzzle:"❄️", mirejaw:"🪓", pyrodrake:"🔥",
-  mossrex:"🪨", skyrend:"🗡️", tuskmaul:"🔨", sunfang:"🐾", chillbert:"🔨"
+  mossrex:"🪨", skyrend:"🗡️", tuskmaul:"🔨", sunfang:"🐾", chillbert:"🔨",
+  brdysh:"🪨", cheremsha:"🌿"
 };
 function natWeapon(a){ return NAT_WEAPON[a] || "✊"; }
 
@@ -882,8 +895,8 @@ function gearRow(slot, img, name, cost, bonus){
 function panelGear(){
   const k=S.animal;
   const wrap=el(`<div class="panel stack"><div class="center muted">Развитие: купи доспех и щит — внешность бойца меняется и видна в бою</div></div>`);
-  wrap.appendChild(gearRow("armor",  ANIM.armored[k][0], "Доспех: "+ANIMALS[k].name, GEAR_COST.armor,  GEAR_BONUS.armor));
-  wrap.appendChild(gearRow("shield", ANIM.light[k][0],   SHIELD_NAME[k],              GEAR_COST.shield, GEAR_BONUS.shield));
+  wrap.appendChild(gearRow("armor",  ANIM.armored[sprKey(k)][0], "Доспех: "+ANIMALS[k].name, GEAR_COST.armor,  GEAR_BONUS.armor));
+  wrap.appendChild(gearRow("shield", ANIM.light[sprKey(k)][0],   SHIELD_NAME[k],              GEAR_COST.shield, GEAR_BONUS.shield));
   return wrap;
 }
 function screenArena(){
@@ -1069,6 +1082,8 @@ function specialEffect(a, t){
     case "sunfang":    return {mult:1.55, forceCrit:true, txt:`🐅 ${me} осыпает «Солнечными Когтями»! ☀️ Крит!`};
     // вампиризм
     case "mirejaw":    return {mult:1.55, lifesteal:0.4, txt:`🐊 ${me} смыкает «Болотный Тесак» и крадёт здоровье! 🩸`};
+    case "brdysh":     t.stun=1;   return {mult:1.85, txt:`🦬 ${me} обрушивает «Брдыщ-Удар»! 💥 Оглушение!`};
+    case "cheremsha":  t.poison=3; return {mult:1.35, txt:`🌿 ${me} выпускает «Чесночный Дух»! ☠️ Ядовитое облако на 3 хода!`};
     default: return {mult:1.65, txt:`${a.emoji||"⚔️"} ${me} применяет «${a.special}»! 💥`};
   }
 }
@@ -1105,7 +1120,8 @@ const LOC_FOR = {
   frostmuzzle:"ice", chillbert:"ice", gleamara:"ice", tuskmaul:"ice",
   pyrodrake:"volcano", brakko:"volcano", rumbrute:"volcano", grumhorn:"volcano",
   mirejaw:"ruins", mossrex:"ruins", nyxshade:"ruins", sablewhiff:"ruins", caprion:"ruins",
-  pando:"forest", thornmoose:"forest", quillspike:"forest", aurelion:"forest", wulgrave:"forest", skyrend:"forest", sunfang:"forest"
+  pando:"forest", thornmoose:"forest", quillspike:"forest", aurelion:"forest", wulgrave:"forest", skyrend:"forest", sunfang:"forest",
+  brdysh:"ruins", cheremsha:"forest"
 };
 function sceneFor(key){ return `<img class="scene" draggable="false" alt="" src="${BGS[LOC_FOR[key]||'forest']}">`; }
 function forestScene(){
@@ -1286,9 +1302,12 @@ function variantOf(armor, shield){
   return "base";
 }
 function animVariant(armor){ return armor ? "armored" : "light"; }
+/* персонажи без собственного арта временно берут спрайт другого зверя */
+const SPRITE_ALIAS = { brdysh:"rumbrute", cheremsha:"quillspike" };
+function sprKey(k){ return (ANIM.light && ANIM.light[k]) ? k : (SPRITE_ALIAS[k] || k); }
 function frameset(key, armor){
-  const v=animVariant(!!armor);
-  return (ANIM[v]&&ANIM[v][key]) || ANIM.light[key] || ANIM.light[Object.keys(ANIM.light)[0]];
+  const v=animVariant(!!armor); const k=sprKey(key);
+  return (ANIM[v]&&ANIM[v][k]) || ANIM.light[k] || ANIM.light[Object.keys(ANIM.light)[0]];
 }
 function spr(key, armor, shield){ return frameset(key, !!armor)[0]; }
 function fighterSVG(key, armor, shield){ return `<img class="critterimg" draggable="false" alt="" src="${spr(key, !!armor, !!shield)}">`; }
