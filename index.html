@@ -208,7 +208,7 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
   text-shadow:1px 1px 0 #8a3500,-1px -1px 0 #8a3500}
 
 /* --- зимняя сцена --- */
-.arena{position:relative;height:336px;overflow:hidden;background:linear-gradient(180deg,#aee0ea,#d7eecb)}
+.arena{position:relative;height:356px;overflow:hidden;background:linear-gradient(180deg,#aee0ea,#d7eecb)}
 .arena::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,rgba(8,12,20,.20) 0%,rgba(8,12,20,0) 26%,rgba(8,12,20,.08) 52%,rgba(8,12,20,.58) 100%),radial-gradient(120% 78% at 50% 66%,rgba(0,0,0,0) 40%,rgba(0,0,0,.46) 100%)}
 .scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 68%;z-index:0}
 .snow{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
@@ -221,9 +221,21 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
 .fighter{position:absolute;bottom:14px;text-align:center;transition:transform .12s;z-index:5;--reach:74px;transform-origin:50% 94%}
 .fighter.left{right:calc(50% + 9px);left:auto}
 .fighter.right{left:calc(50% + 9px);right:auto}
-.fighter .av{position:relative;line-height:1;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5)) drop-shadow(0 0 1.5px rgba(0,0,0,.45))}
-.fighter .av::after{content:"";position:absolute;left:50%;bottom:8px;width:58%;height:14px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(0,0,0,.42),rgba(0,0,0,0) 72%);z-index:-1;animation:shadowpulse 2.6s ease-in-out infinite}
-.fighter .av .critterimg{height:auto;width:auto;max-height:216px;max-width:min(44vw,320px);display:block;margin:0 auto;position:relative;z-index:1}
+.fighter .av{position:relative;line-height:1;filter:drop-shadow(0 5px 5px rgba(0,0,0,.5)) drop-shadow(0 0 1.6px rgba(0,0,0,.4)) saturate(1.1) contrast(1.06)}
+.fighter .av::after{display:none}
+.fighter .av .critterimg{height:auto;width:auto;max-height:240px;max-width:min(44vw,340px);display:block;margin:0 auto;position:relative;z-index:1}
+/* тень на земле — отдельный элемент, остаётся на месте при прыжке */
+.gshadow{position:absolute;bottom:16px;height:15px;border-radius:50%;z-index:4;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.5),rgba(0,0,0,0) 70%);
+  transform:translateX(-50%) scale(1);transition:transform .14s ease-out,opacity .14s ease-out;will-change:transform}
+.gshadow.air{transform:translateX(-50%) scale(.55);opacity:.5}
+/* hit-stop — короткий «удар-зум» на критах/спецприёмах */
+.arena-wrap.hitstop{animation:hitstop .16s ease-out}
+@keyframes hitstop{0%{transform:scale(1)}35%{transform:scale(1.025)}100%{transform:scale(1)}}
+/* частицы по локации */
+.particle{position:absolute;z-index:8;pointer-events:none;border-radius:50%;will-change:transform,opacity}
+@keyframes partfly{0%{opacity:1;transform:translate(0,0) scale(1) rotate(0)}
+  100%{opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(.35) rotate(var(--dr,90deg))}}
 /* лёгкое «дыхание» в простое — бойцы больше не статичны */
 .rig{position:relative;display:inline-block;transform-origin:50% 100%;animation:idlebob 2.6s ease-in-out infinite}
 .fighter.right .rig{animation-duration:2.9s;animation-delay:-1.15s}
@@ -1320,6 +1332,8 @@ function screenFight(hero,enemy,o,idx,sim){
       <div class="arena" id="arena">
         ${sceneFor(enemy.animal)}
         <div class="snow" id="snow"></div>
+        <div class="gshadow" id="gsL"></div>
+        <div class="gshadow" id="gsR"></div>
 
         <div class="fighter left" id="fL">
           <div class="av">${fightRig(hero.animal, {armor:!!(S.armor&&S.armorOn), shield:!!(S.shield&&S.shieldOn)})}</div>
@@ -1345,6 +1359,9 @@ function screenFight(hero,enemy,o,idx,sim){
   const hptL=node.querySelector("#hptL"), hptR=node.querySelector("#hptR");
   const comm=node.querySelector("#comm");
   const banner=node.querySelector("#banner");
+  const wrap=node.querySelector(".arena-wrap");
+  const gsL=node.querySelector("#gsL"), gsR=node.querySelector("#gsR");
+  const loc=LOC_FOR[enemy.animal]||"forest";
 
   let hcur=hero.hp, ecur=enemy.hp;
 
@@ -1360,13 +1377,33 @@ function screenFight(hero,enemy,o,idx,sim){
     snow.appendChild(f);
   }
 
-  // дистанция короткого наскока в центр
+  // дистанция короткого наскока в центр + защита от обрезки по краям
+  function positionShadow(sh, im){
+    if(!sh||!im) return;
+    const aw=arena.clientWidth; if(!aw) return;
+    const ar=arena.getBoundingClientRect(), ir=im.getBoundingClientRect();
+    if(!ir.width) return;
+    const cx=(ir.left+ir.width/2)-ar.left;       // центр спрайта по X отн. арены
+    sh.style.left=(cx/aw*100).toFixed(2)+"%";
+    sh.style.width=Math.max(70, Math.round(ir.width*0.6))+"px";
+  }
   function setReach(){
-    const r=Math.min(120, Math.max(58, Math.round(arena.clientWidth*0.12)));
+    const w=arena.clientWidth;
+    if(!w) return;                              // ещё не в DOM — пересчитаем позже
+    const r=Math.min(120, Math.max(58, Math.round(w*0.12)));
     fL.style.setProperty("--reach", r+"px");
     fR.style.setProperty("--reach", (-r)+"px");
+    // ширина спрайта не больше половины арены минус центр-отступ и поле -> край не режет
+    const maxW=Math.max(90, Math.floor(w*0.5 - 9 - 16));
+    if(imgL) imgL.style.maxWidth=maxW+"px";
+    if(imgR) imgR.style.maxWidth=maxW+"px";
+    positionShadow(gsL, imgL);
+    positionShadow(gsR, imgR);
   }
   setReach(); window.addEventListener("resize", setReach);
+  // пересчёт после декодирования data-URI картинок
+  [imgL,imgR].forEach(im=>{ if(im) im.addEventListener("load", setReach); });
+  fightTimers.push(setTimeout(setReach,160)); fightTimers.push(setTimeout(setReach,500));
 
   setTimeout(()=>{ if(!MUTED) sfxClick(); banner.innerHTML=""; }, 900);
 
@@ -1414,6 +1451,32 @@ function screenFight(hero,enemy,o,idx,sim){
     const f=el(`<div class="flash ${rage?'rage':''}"></div>`);
     arena.appendChild(f); setTimeout(()=>f.remove(),300);
   }
+  // частицы по локации: лёд/вулкан/руины/лес
+  const PARTS={
+    ice:    {cols:["#e7f6ff","#bfe6ff","#ffffff"], emoji:"❄", n:7},
+    volcano:{cols:["#ffb14a","#ff6a2a","#ffe08a"], emoji:"",  n:9},
+    ruins:  {cols:["#caa46a","#9c7b4a","#e6d2a8"], emoji:"",  n:8},
+    forest: {cols:["#8fce5a","#5fa83a","#cdec9a"], emoji:"🍃", n:7},
+  };
+  function spawnParticles(heavy){
+    const cfg=PARTS[loc]||PARTS.forest;
+    const n=cfg.n+(heavy?5:0);
+    for(let i=0;i<n;i++){
+      const ang=Math.random()*Math.PI*2, dist=18+Math.random()*(heavy?78:46);
+      const dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-12;
+      const useEmoji=cfg.emoji && Math.random()<0.4;
+      const p=document.createElement("div"); p.className="particle";
+      p.style.left="50%"; p.style.top="54%";
+      p.style.setProperty("--dx",dx.toFixed(0)+"px");
+      p.style.setProperty("--dy",dy.toFixed(0)+"px");
+      p.style.setProperty("--dr",(Math.random()*220-110).toFixed(0)+"deg");
+      p.style.animation="partfly "+(0.5+Math.random()*0.4).toFixed(2)+"s ease-out forwards";
+      if(useEmoji){ p.style.fontSize=(10+Math.random()*8).toFixed(0)+"px"; p.textContent=cfg.emoji; }
+      else { const c=cfg.cols[i%cfg.cols.length]; const sz=(3+Math.random()*5).toFixed(0);
+        p.style.width=sz+"px"; p.style.height=sz+"px"; p.style.background=c; p.style.boxShadow="0 0 4px "+c; }
+      arena.appendChild(p); setTimeout(()=>p.remove(),960);
+    }
+  }
 
   function play(){
     if(done) return;
@@ -1452,12 +1515,15 @@ function screenFight(hero,enemy,o,idx,sim){
     const atkSide=e.s;                       // кто бьёт
     const atkEl = atkSide==="L"?fL:fR;
     const defEl = atkSide==="L"?fR:fL;
+    const atkShadow = atkSide==="L"?gsL:gsR;
     const isSpec = e.t==="special";
+    const heavy = isSpec || e.crit;
     comm.textContent=e.txt;
 
     // подшаг к сопернику; на супер-ударе — высокий ПРЫЖОК
     beep(540,0.06,"sine",0.04);
-    if(isSpec){ atkEl.classList.add(atkSide==="L"?"leap-l":"leap-r"); beep(720,0.1,"triangle",0.05); }
+    if(isSpec){ atkEl.classList.add(atkSide==="L"?"leap-l":"leap-r"); beep(720,0.1,"triangle",0.05);
+      if(atkShadow) atkShadow.classList.add("air"); }       // тень съёживается, пока боец в прыжке
     else { atkEl.classList.add(atkSide==="L"?"jump-l":"jump-r"); }
     // покадровая анимация атаки с оружием (кадры из архива; удар ~кадр 4)
     const atkImg = atkSide==="L"?imgL:imgR;
@@ -1472,11 +1538,11 @@ function screenFight(hero,enemy,o,idx,sim){
       if(atkSide==="L"){ ecur-=e.dmg; setHP(hpR,hptR,ecur,emax); if(e.heal){hcur=Math.min(hmax,hcur+e.heal);setHP(hpL,hptL,hcur,hmax);} }
       else { hcur-=e.dmg; setHP(hpL,hptL,hcur,hmax); }
 
-      const heavy = isSpec || e.crit;
       sparkAt();
       powAt(heavy);
       slashAt(heavy);
-      if(heavy) flashScreen(isSpec);
+      spawnParticles(heavy);
+      if(heavy){ flashScreen(isSpec); wrap.classList.add("hitstop"); setTimeout(()=>wrap.classList.remove("hitstop"),170); }
       floatTxt(atkSide==="L"?"R":"L", "-"+e.dmg, "dmg"+(heavy?" crit":""));
 
       defEl.classList.add("hurt");  setTimeout(()=>defEl.classList.remove("hurt"),300);
@@ -1493,10 +1559,11 @@ function screenFight(hero,enemy,o,idx,sim){
     // снять классы наскока и вернуть в стойку
     fightTimers.push(setTimeout(()=>{
       atkEl.classList.remove("jump-l","jump-r","leap-l","leap-r");
+      if(atkShadow) atkShadow.classList.remove("air");
       if(atkImg) atkImg.src=idleFrame;
     }, 700));
 
-    delay = e.twin ? 600 : 1040;
+    delay = e.twin ? 600 : (heavy ? 1140 : 1040);   // микро-пауза после тяжёлого удара (hit-stop)
     fightTimers.push(setTimeout(play, delay));
   }
 
