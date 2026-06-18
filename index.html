@@ -600,7 +600,12 @@ function critChance(){ return 10 + (WEAPONS[S.weapon].crit||0); }
 function power(){ return Math.round(eff("atk")*2.2 + eff("def")*1.8 + eff("hp")*0.4 + eff("spd")*1.5); }
 
 /* эмодзи оружия "по умолчанию" в лапах зверя (всегда вооружён) */
-const NAT_WEAPON = {panda:"🥢", los:"🪵", croc:"🪓", rhino:"🔨", skunk:"🧪", raccoon:"🗡️", porcupine:"🗡️"};
+const NAT_WEAPON = {
+  pando:"🥢", thornmoose:"🦌", gleamara:"🔮", grumhorn:"🛡️", aurelion:"🌞",
+  brakko:"🪝", rumbrute:"🦴", sablewhiff:"🌙", caprion:"🗡️", nyxshade:"🐾",
+  wulgrave:"🗡️", quillspike:"🌵", frostmuzzle:"❄️", mirejaw:"🪓", pyrodrake:"🔥",
+  mossrex:"🪨", skyrend:"🗡️", tuskmaul:"🔨", sunfang:"🐾", chillbert:"🔨"
+};
 function natWeapon(a){ return NAT_WEAPON[a] || "✊"; }
 
 /* строит бойца-соперника по уровню лестницы */
@@ -896,8 +901,9 @@ function screenArena(){
    СИМУЛЯЦИЯ БОЯ  -> список событий, потом проигрываем
    ========================================================= */
 function rnd(a,b){ return a+Math.random()*(b-a); }
-function calcDmg(att, def, mult){
-  let base = (att.atk*1.0 - def.def*0.45);
+function calcDmg(att, def, mult, defFactor){
+  const df = (defFactor==null ? 1 : defFactor);   // <1 пробивает броню, 0 — игнор защиты
+  let base = (att.atk*1.0 - def.def*0.45*df);
   base = Math.max(2, base) * rnd(0.85,1.15) * (mult||1);
   return Math.round(base);
 }
@@ -926,7 +932,7 @@ function simulate(hero, enemy){
     if(actor.stun>0){ actor.stun--; log.push({t:"stun",s:side(actor),txt:`${nm(actor)} оглушён и пропускает ход!`}); applyPoison(actor); continue; }
 
     actor.rage++;
-    let mult=1, kind="hit", txt="";
+    let mult=1, kind="hit", txt="", defFactor=1, lifesteal=0;
     // супер-удар: каждый 4-й ИЛИ случайно (~13%)
     const isSpecial = (actor.rage%4===0) || (Math.random()<0.13);
     let crit = Math.random()*100 < (actor.crit||10);
@@ -934,7 +940,10 @@ function simulate(hero, enemy){
     if(isSpecial){
       kind="special";
       const r=specialEffect(actor, tgt);
-      mult=r.mult; txt=r.txt; if(r.forceCrit) crit=true;
+      mult=r.mult; txt=r.txt;
+      if(r.forceCrit) crit=true;
+      if(r.pierce!=null) defFactor=r.pierce;     // пробитие брони
+      if(r.lifesteal) lifesteal=r.lifesteal;     // вампиризм
     }
 
     // уворот защищающегося (зависит от скорости) — не для спеца
@@ -952,11 +961,11 @@ function simulate(hero, enemy){
     }
 
     if(crit && !isSpecial) mult*=1.9;
-    let dmg=calcDmg(actor,tgt,mult);
+    let dmg=calcDmg(actor,tgt,mult,defFactor);
 
-    // крокодил вампиризм на спеце
+    // вампиризм на спеце (напр. болотный крокодил Майрджо)
     let heal=0;
-    if(isSpecial && actor.animal==="croc"){ heal=Math.round(dmg*0.4); actor.chp=Math.min(actor.hp, actor.chp+heal); }
+    if(isSpecial && lifesteal){ heal=Math.round(dmg*lifesteal); actor.chp=Math.min(actor.hp, actor.chp+heal); }
 
     tgt.chp-=dmg;
     log.push({
@@ -1002,15 +1011,35 @@ function hitLine(a,t,crit){
   return `${a.emoji} ${nm(a)} ${v} ${t.emoji}${crit?" — КРИТ! 💢":""}`;
 }
 function specialEffect(a, t){
+  const me=nm(a);
   switch(a.animal){
-    case "panda":  return {mult:1.6, txt:`🐼 ${nm(a)} крутит «Бамбуковый Вихрь»! 🌀`};
-    case "los":    t.stun=1; return {mult:1.8, txt:`🦌 ${nm(a)} идёт на «Таран Рогами»! 💥 Оглушение!`};
-    case "croc":   return {mult:1.5, txt:`🐊 ${nm(a)} применяет «Мёртвую Хватку» и крадёт здоровье! 🩸`};
-    case "rhino":  return {mult:2.0, txt:`🦏 ${nm(a)} прёт «Носорожьим Натиском» сквозь защиту! 🛡️💢`};
-    case "skunk":  t.poison=3; return {mult:1.2, txt:`🦨 ${nm(a)} кидает «Вонючую Бомбу»! ☠️ Яд на 3 хода!`};
-    case "raccoon":return {mult:1.4, forceCrit:true, txt:`🦝 ${nm(a)} наносит «Подлый Удар» исподтишка! 🗡️`};
-    case "porcupine":return {mult:1.6, txt:`🦔 ${nm(a)} даёт «Игольный Залп» — туча игл! 🌵`};
-    default: return {mult:1.65, txt:`${a.emoji||"⚔️"} ${nm(a)} применяет «${a.special}»! 💥`};
+    // быстрые серии / усиленный урон
+    case "pando":      return {mult:1.65, txt:`🐼 ${me} крутит «Бамбуковый Вихрь»! 🌀`};
+    case "wulgrave":   return {mult:1.7,  txt:`🐺 ${me} рубит «Клинком Луны»! 🌙`};
+    case "rumbrute":   return {mult:1.85, txt:`🐻 ${me} впадает в ярость — «Костяной Раш»! 💢`};
+    case "aurelion":   return {mult:2.0,  txt:`🦁 ${me} обрушивает «Солнечный Гнев»! ☀️💥`};
+    case "mossrex":    return {mult:2.0,  txt:`🦖 ${me} раскалывает «Каменным Топором»! 🪨💥`};
+    // оглушение
+    case "thornmoose": t.stun=1; return {mult:1.8, txt:`🦌 ${me} идёт на «Удар Рогами»! 💥 Оглушение!`};
+    case "tuskmaul":   t.stun=1; return {mult:1.8, txt:`🦣 ${me} бьёт «Бивневой Дубиной»! 💥 Оглушение!`};
+    case "frostmuzzle":t.stun=1; return {mult:1.5, txt:`🐵 ${me} ставит «Морозный Тотем»! ❄️ Заморозка!`};
+    case "chillbert":  t.stun=1; return {mult:1.7, txt:`⛄ ${me} опускает «Ледяной Молот»! 🧊 Заморозка!`};
+    // пробитие брони
+    case "grumhorn":   return {mult:1.9, pierce:0,    txt:`🦏 ${me} прёт «Носорожьим Натиском» сквозь защиту! 🛡️💢`};
+    case "gleamara":   return {mult:1.6, pierce:0.2,  txt:`🔮 ${me} бьёт «Кристальным Залпом» — магия сквозь броню! ✨`};
+    case "skyrend":    return {mult:1.7, pierce:0.25, txt:`🦅 ${me} пикирует «Небесной Глефой»! 🌪️`};
+    // яд / кровотечение / горение
+    case "quillspike": t.poison=3; return {mult:1.3, txt:`🦔 ${me} даёт «Игольный Залп» — туча ядовитых игл! 🌵 Яд на 3 хода!`};
+    case "brakko":     t.poison=2; return {mult:1.6, txt:`🐗 ${me} рвёт «Клыкастым Крюком»! 🩸 Кровотечение!`};
+    case "pyrodrake":  t.poison=2; return {mult:1.8, txt:`🐉 ${me} жжёт «Огненной Алебардой»! 🔥 Горение!`};
+    // гарантированный крит
+    case "sablewhiff": return {mult:1.45, forceCrit:true, txt:`🦨 ${me} наносит «Теневой Серп» исподтишка! 🗡️`};
+    case "caprion":    return {mult:1.5,  forceCrit:true, txt:`🐐 ${me} закручивает «Вихрь Ветра»! 🌪️ Крит!`};
+    case "nyxshade":   return {mult:1.6,  forceCrit:true, txt:`🐆 ${me} полосует «Ночными Когтями»! 🌑 Крит!`};
+    case "sunfang":    return {mult:1.55, forceCrit:true, txt:`🐅 ${me} осыпает «Солнечными Когтями»! ☀️ Крит!`};
+    // вампиризм
+    case "mirejaw":    return {mult:1.55, lifesteal:0.4, txt:`🐊 ${me} смыкает «Болотный Тесак» и крадёт здоровье! 🩸`};
+    default: return {mult:1.65, txt:`${a.emoji||"⚔️"} ${me} применяет «${a.special}»! 💥`};
   }
 }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
