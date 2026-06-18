@@ -221,10 +221,21 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
 .fighter{position:absolute;bottom:14px;text-align:center;transition:transform .12s;z-index:5;--reach:74px;transform-origin:50% 94%}
 .fighter.left{right:calc(50% + 9px);left:auto}
 .fighter.right{left:calc(50% + 9px);right:auto}
-.fighter .av{position:relative;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
-.fighter .av::after{content:"";position:absolute;left:50%;bottom:8px;width:58%;height:14px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(0,0,0,.42),rgba(0,0,0,0) 72%);z-index:-1}
+.fighter .av{position:relative;line-height:1;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5)) drop-shadow(0 0 1.5px rgba(0,0,0,.45))}
+.fighter .av::after{content:"";position:absolute;left:50%;bottom:8px;width:58%;height:14px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(0,0,0,.42),rgba(0,0,0,0) 72%);z-index:-1;animation:shadowpulse 2.6s ease-in-out infinite}
 .fighter .av .critterimg{height:216px;width:auto;display:block;margin:0 auto;position:relative;z-index:1}
-.rig{position:relative;display:inline-block}
+/* лёгкое «дыхание» в простое — бойцы больше не статичны */
+.rig{position:relative;display:inline-block;transform-origin:50% 100%;animation:idlebob 2.6s ease-in-out infinite}
+.fighter.right .rig{animation-duration:2.9s;animation-delay:-1.15s}
+.fighter.ko .rig,.fighter.win-dance .rig{animation:none}
+@keyframes idlebob{
+  0%,100%{transform:translateY(0) rotate(0) scaleY(1)}
+  50%{transform:translateY(-4px) rotate(-1deg) scaleY(1.012)}
+}
+@keyframes shadowpulse{
+  0%,100%{opacity:.85;transform:translateX(-50%) scaleX(1)}
+  50%{opacity:.65;transform:translateX(-50%) scaleX(.92)}
+}
 .wpnwrap{position:absolute;transform-origin:0 0;z-index:6;pointer-events:none}
 .wpnpivot{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 .wpnimg{position:absolute;left:0;top:0;display:block;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.3))}
@@ -275,33 +286,39 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
 .jump-l{animation:jump-l .66s cubic-bezier(.34,.62,.3,1) both;z-index:7}
 .jump-r{animation:jump-r .66s cubic-bezier(.34,.62,.3,1) both;z-index:7}
 @keyframes jump-l{
-  0%  {transform:translate(0,0)}
-  24% {transform:translate(-5px,0)}
-  54% {transform:translate(var(--reach),-2px)}
-  100%{transform:translate(0,0)}
+  0%  {transform:translate(0,0) scale(1,1)}
+  14% {transform:translate(-9px,3px) scale(1.07,.9)}                      /* присел — замах */
+  32% {transform:translate(calc(var(--reach)*.45),-8px) scale(.93,1.1)}   /* рывок-вытяжка */
+  54% {transform:translate(var(--reach),-2px) scale(1.03,.97)}            /* контакт */
+  72% {transform:translate(calc(var(--reach)*.45),1px) scale(.98,1.02)}
+  100%{transform:translate(0,0) scale(1,1)}
 }
 @keyframes jump-r{
-  0%  {transform:translate(0,0)}
-  24% {transform:translate(5px,0)}
-  54% {transform:translate(var(--reach),-2px)}
-  100%{transform:translate(0,0)}
+  0%  {transform:translate(0,0) scale(1,1)}
+  14% {transform:translate(9px,3px) scale(1.07,.9)}
+  32% {transform:translate(calc(var(--reach)*.45),-8px) scale(.93,1.1)}
+  54% {transform:translate(var(--reach),-2px) scale(1.03,.97)}
+  72% {transform:translate(calc(var(--reach)*.45),1px) scale(.98,1.02)}
+  100%{transform:translate(0,0) scale(1,1)}
 }
 /* СУПЕР-УДАР: высокий прыжок к сопернику */
 .leap-l{animation:leap-l .68s cubic-bezier(.3,.62,.32,1) both;z-index:8}
 .leap-r{animation:leap-r .68s cubic-bezier(.3,.62,.32,1) both;z-index:8}
 @keyframes leap-l{
-  0%  {transform:translate(0,0)}
-  16% {transform:translate(-8px,3px)}
-  36% {transform:translate(calc(var(--reach)*.6),-54px)}
-  56% {transform:translate(var(--reach),0)}
-  100%{transform:translate(0,0)}
+  0%  {transform:translate(0,0) scale(1,1)}
+  14% {transform:translate(-12px,5px) scale(1.1,.86)}                      /* глубокий присед */
+  36% {transform:translate(calc(var(--reach)*.6),-62px) scale(.86,1.18)}   /* высокий прыжок */
+  56% {transform:translate(var(--reach),0) scale(1.07,.93)}                /* удар-приземление */
+  74% {transform:translate(calc(var(--reach)*.5),2px) scale(.97,1.03)}
+  100%{transform:translate(0,0) scale(1,1)}
 }
 @keyframes leap-r{
-  0%  {transform:translate(0,0)}
-  16% {transform:translate(8px,3px)}
-  36% {transform:translate(calc(var(--reach)*.6),-54px)}
-  56% {transform:translate(var(--reach),0)}
-  100%{transform:translate(0,0)}
+  0%  {transform:translate(0,0) scale(1,1)}
+  14% {transform:translate(12px,5px) scale(1.1,.86)}
+  36% {transform:translate(calc(var(--reach)*.6),-62px) scale(.86,1.18)}
+  56% {transform:translate(var(--reach),0) scale(1.07,.93)}
+  74% {transform:translate(calc(var(--reach)*.5),2px) scale(.97,1.03)}
+  100%{transform:translate(0,0) scale(1,1)}
 }
 /* --- замах и удар оружием (синхронно с наскоком, возврат в руку) --- */
 .swing-l{animation:swing-l .6s cubic-bezier(.3,.6,.3,1) both}
@@ -348,6 +365,7 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
 @media (prefers-reduced-motion:reduce){
   .jump-l,.jump-r{animation-duration:.4s}
   .slash,.slash.s2,.puff{display:none}
+  .rig,.fighter .av::after{animation:none}
 }
 @keyframes hurt{0%{filter:none}30%{filter:brightness(2) sepia(1) hue-rotate(-50deg) saturate(4)}100%{filter:none}}
 .ko{transform:rotate(180deg) translateY(20px)!important;opacity:.5;transition:transform .6s,opacity .6s}
@@ -1462,9 +1480,11 @@ function screenFight(hero,enemy,o,idx,sim){
       floatTxt(atkSide==="L"?"R":"L", "-"+e.dmg, "dmg"+(heavy?" crit":""));
 
       defEl.classList.add("hurt");  setTimeout(()=>defEl.classList.remove("hurt"),300);
-      defEl.style.transition="transform .12s";
-      defEl.style.transform=(atkSide==="L"?"translateX(28px)":"translateX(-28px)")+" rotate("+(atkSide==="L"?10:-10)+"deg)";
-      setTimeout(()=>{ defEl.style.transition="transform .25s"; defEl.style.transform=""; },220);
+      // отдача от удара: отлёт + флинч-сквош (сильнее на крите/спеце)
+      const kb=heavy?40:26, rot=heavy?14:9;
+      defEl.style.transition="transform .1s cubic-bezier(.2,.8,.3,1)";
+      defEl.style.transform=(atkSide==="L"?"translateX("+kb+"px)":"translateX(-"+kb+"px)")+" rotate("+(atkSide==="L"?rot:-rot)+"deg) scale(1.06,.9)";
+      setTimeout(()=>{ defEl.style.transition="transform .28s cubic-bezier(.3,1.4,.5,1)"; defEl.style.transform=""; },200);
 
       arena.classList.add("shake"); setTimeout(()=>arena.classList.remove("shake"),320);
       if(isSpec) sfxSpecial(); else if(e.crit) sfxCrit(); else sfxHit();
