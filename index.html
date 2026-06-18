@@ -223,7 +223,7 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
 .fighter.right{left:calc(50% + 9px);right:auto}
 .fighter .av{position:relative;line-height:1;filter:drop-shadow(0 4px 4px rgba(0,0,0,.5)) drop-shadow(0 0 1.5px rgba(0,0,0,.45))}
 .fighter .av::after{content:"";position:absolute;left:50%;bottom:8px;width:58%;height:14px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(0,0,0,.42),rgba(0,0,0,0) 72%);z-index:-1;animation:shadowpulse 2.6s ease-in-out infinite}
-.fighter .av .critterimg{height:216px;width:auto;display:block;margin:0 auto;position:relative;z-index:1}
+.fighter .av .critterimg{height:auto;width:auto;max-height:216px;max-width:min(44vw,320px);display:block;margin:0 auto;position:relative;z-index:1}
 /* лёгкое «дыхание» в простое — бойцы больше не статичны */
 .rig{position:relative;display:inline-block;transform-origin:50% 100%;animation:idlebob 2.6s ease-in-out infinite}
 .fighter.right .rig{animation-duration:2.9s;animation-delay:-1.15s}
