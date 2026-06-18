@@ -1649,7 +1649,15 @@ function screenResult(o,idx,win,coins,rep,first){
    ========================================================= */
 document.getElementById("play")&&null;
 async function boot(){
-  const loaded=await tryLoad();
+  // не даём загрузке сейва подвесить старт: если window.storage не отвечает
+  // (бывает во встроенных webview на телефоне) — стартуем со свежим состоянием
+  let loaded=null;
+  try{
+    loaded = await Promise.race([
+      tryLoad(),
+      new Promise(res=>setTimeout(()=>res(null), 1500))
+    ]);
+  }catch(e){ loaded=null; }
   S = loaded || freshState();
   // совместимость со старыми сохранёнками: сбросить несуществующих зверя/оружие
   if(S.animal && !ANIMALS[S.animal]) S.animal=null;
