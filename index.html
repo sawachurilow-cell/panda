@@ -432,7 +432,8 @@ const WMAP = {
   sunfang:"sun_claws",
   chillbert:"ice_hammer",
   brdysh:"bone_gauntlets",
-  cheremsha:"thorn_knuckles"
+  cheremsha:"thorn_knuckles",
+  sirozha:"iron_horn_shield"
 };
 const PLACE = {
   pando:{hx:0.72,hy:0.61,scale:0.364,rot:-8},
@@ -456,7 +457,8 @@ const PLACE = {
   sunfang:{hx:0.52,hy:0.67,scale:0.28,rot:0},
   chillbert:{hx:0.76,hy:0.65,scale:0.336,rot:-8},
   brdysh:{hx:0.5,hy:0.69,scale:0.28,rot:0},
-  cheremsha:{hx:0.5,hy:0.69,scale:0.28,rot:0}
+  cheremsha:{hx:0.5,hy:0.69,scale:0.28,rot:0},
+  sirozha:{hx:0.74,hy:0.61,scale:0.364,rot:0}
 };
 const GRIP = {
   bamboo_staff:{gx:0.5,gy:0.85},
@@ -504,7 +506,8 @@ const SHIELD_NAME = {
   sunfang:"Солнечный клык",
   chillbert:"Ледяной баклер",
   brdysh:"Дубовый щит",
-  cheremsha:"Луковый вард"
+  cheremsha:"Луковый вард",
+  sirozha:"Эгида совы"
 };
 const ARMOR_NAME = {
   pando:"Набор лесного разведчика",
@@ -528,7 +531,8 @@ const ARMOR_NAME = {
   sunfang:"Золотой набор",
   chillbert:"Снежный наряд",
   brdysh:"Бронегруз",
-  cheremsha:"Травяной доспех"
+  cheremsha:"Травяной доспех",
+  sirozha:"Доспех Афины"
 };
 const GEAR_COST = {armor:240, shield:140};
 const GEAR_BONUS = {armor:{def:8, hp:30, atk:2}, shield:{def:6, hp:12}};
@@ -563,6 +567,7 @@ const ANIMALS = {
   chillbert:{emoji:"⛄", name:"Чиллберт", tag:"Ледяной голем", atk:13, def:15, hp:130, spd:6, special:"Ледяной Молот", sdesc:"сокрушает льдом"},
   brdysh:{emoji:"🦬", name:"Брдыш", tag:"Лесной громила", atk:15, def:14, hp:140, spd:5, special:"Брдыщ-Удар", sdesc:"сокрушительный таран с оглушением"},
   cheremsha:{emoji:"🌿", name:"Черёмша", tag:"Дикий чеснок", atk:12, def:10, hp:100, spd:12, special:"Чесночный Дух", sdesc:"ядовитое облако чеснока"},
+  sirozha:{emoji:"🦉", name:"Сирожа", tag:"Синяя голова", atk:15, def:14, hp:120, spd:8, special:"Совиный Шквал", sdesc:"серия ударов с эгидой совы"},
 };
 
 /* ---------- оружие ---------- */
@@ -578,24 +583,25 @@ const WEAPONS = {
 
 /* ---------- лестница соперников ---------- */
 const LADDER = [
-  {pos:"#22", name:"Сэйблвифф", a:"sablewhiff", lvl:0, coins:40, rep:8},
-  {pos:"#21", name:"Каприон", a:"caprion", lvl:1, coins:56, rep:10},
-  {pos:"#20", name:"Черёмша", a:"cheremsha", lvl:2, coins:70, rep:12},
-  {pos:"#19", name:"Квиллспайк", a:"quillspike", lvl:2, coins:80, rep:13},
-  {pos:"#18", name:"Глеамара", a:"gleamara", lvl:3, coins:90, rep:14},
-  {pos:"#17", name:"Никсшейд", a:"nyxshade", lvl:4, coins:104, rep:16},
-  {pos:"#16", name:"Вулгрейв", a:"wulgrave", lvl:5, coins:118, rep:18},
-  {pos:"#15", name:"Пандо", a:"pando", lvl:5, coins:120, rep:18},
-  {pos:"#14", name:"Скайренд", a:"skyrend", lvl:6, coins:134, rep:20},
-  {pos:"#13", name:"Бракко", a:"brakko", lvl:6, coins:136, rep:20},
-  {pos:"#12", name:"Фростмузл", a:"frostmuzzle", lvl:7, coins:150, rep:22},
-  {pos:"#11", name:"Санфанг", a:"sunfang", lvl:7, coins:152, rep:22},
-  {pos:"#10", name:"Майрджо", a:"mirejaw", lvl:8, coins:166, rep:24},
-  {pos:"#9", name:"Торнмус", a:"thornmoose", lvl:8, coins:168, rep:24},
-  {pos:"#8", name:"Брдыш", a:"brdysh", lvl:9, coins:180, rep:26},
-  {pos:"#7", name:"Румбрут", a:"rumbrute", lvl:9, coins:184, rep:26},
-  {pos:"#6", name:"Грумхорн", a:"grumhorn", lvl:10, coins:198, rep:28},
-  {pos:"#5", name:"Пиродрейк", a:"pyrodrake", lvl:10, coins:200, rep:28},
+  {pos:"#23", name:"Сэйблвифф", a:"sablewhiff", lvl:0, coins:40, rep:8},
+  {pos:"#22", name:"Каприон", a:"caprion", lvl:1, coins:56, rep:10},
+  {pos:"#21", name:"Черёмша", a:"cheremsha", lvl:2, coins:70, rep:12},
+  {pos:"#20", name:"Квиллспайк", a:"quillspike", lvl:2, coins:80, rep:13},
+  {pos:"#19", name:"Глеамара", a:"gleamara", lvl:3, coins:90, rep:14},
+  {pos:"#18", name:"Никсшейд", a:"nyxshade", lvl:4, coins:104, rep:16},
+  {pos:"#17", name:"Вулгрейв", a:"wulgrave", lvl:5, coins:118, rep:18},
+  {pos:"#16", name:"Пандо", a:"pando", lvl:5, coins:120, rep:18},
+  {pos:"#15", name:"Скайренд", a:"skyrend", lvl:6, coins:134, rep:20},
+  {pos:"#14", name:"Бракко", a:"brakko", lvl:6, coins:136, rep:20},
+  {pos:"#13", name:"Фростмузл", a:"frostmuzzle", lvl:7, coins:150, rep:22},
+  {pos:"#12", name:"Санфанг", a:"sunfang", lvl:7, coins:152, rep:22},
+  {pos:"#11", name:"Майрджо", a:"mirejaw", lvl:8, coins:166, rep:24},
+  {pos:"#10", name:"Торнмус", a:"thornmoose", lvl:8, coins:168, rep:24},
+  {pos:"#9", name:"Брдыш", a:"brdysh", lvl:9, coins:180, rep:26},
+  {pos:"#8", name:"Румбрут", a:"rumbrute", lvl:9, coins:184, rep:26},
+  {pos:"#7", name:"Грумхорн", a:"grumhorn", lvl:10, coins:198, rep:28},
+  {pos:"#6", name:"Пиродрейк", a:"pyrodrake", lvl:10, coins:200, rep:28},
+  {pos:"#5", name:"Сирожа", a:"sirozha", lvl:11, coins:210, rep:30},
   {pos:"#4", name:"Моссрекс", a:"mossrex", lvl:11, coins:216, rep:30},
   {pos:"#3", name:"Чиллберт", a:"chillbert", lvl:11, coins:216, rep:30},
   {pos:"#2", name:"Тускмол", a:"tuskmaul", lvl:12, coins:232, rep:32},
@@ -649,7 +655,7 @@ const NAT_WEAPON = {
   brakko:"🪝", rumbrute:"🦴", sablewhiff:"🌙", caprion:"🗡️", nyxshade:"🐾",
   wulgrave:"🗡️", quillspike:"🌵", frostmuzzle:"❄️", mirejaw:"🪓", pyrodrake:"🔥",
   mossrex:"🪨", skyrend:"🗡️", tuskmaul:"🔨", sunfang:"🐾", chillbert:"🔨",
-  brdysh:"🪨", cheremsha:"🌿"
+  brdysh:"🪨", cheremsha:"🌿", sirozha:"⚔️"
 };
 function natWeapon(a){ return NAT_WEAPON[a] || "✊"; }
 
@@ -1086,6 +1092,7 @@ function specialEffect(a, t){
     case "mirejaw":    return {mult:1.55, lifesteal:0.4, txt:`🐊 ${me} смыкает «Болотный Тесак» и крадёт здоровье! 🩸`};
     case "brdysh":     t.stun=1;   return {mult:1.85, txt:`🦬 ${me} обрушивает «Брдыщ-Удар»! 💥 Оглушение!`};
     case "cheremsha":  t.poison=3; return {mult:1.35, txt:`🌿 ${me} выпускает «Чесночный Дух»! ☠️ Ядовитое облако на 3 хода!`};
+    case "sirozha":    return {mult:1.6, forceCrit:true, txt:`🦉 ${me} обрушивает «Совиный Шквал» с эгидой Афины! 🛡️⚔️`};
     default: return {mult:1.65, txt:`${a.emoji||"⚔️"} ${me} применяет «${a.special}»! 💥`};
   }
 }
@@ -1123,7 +1130,7 @@ const LOC_FOR = {
   pyrodrake:"volcano", brakko:"volcano", rumbrute:"volcano", grumhorn:"volcano",
   mirejaw:"ruins", mossrex:"ruins", nyxshade:"ruins", sablewhiff:"ruins", caprion:"ruins",
   pando:"forest", thornmoose:"forest", quillspike:"forest", aurelion:"forest", wulgrave:"forest", skyrend:"forest", sunfang:"forest",
-  brdysh:"ruins", cheremsha:"forest"
+  brdysh:"ruins", cheremsha:"forest", sirozha:"ruins"
 };
 function sceneFor(key){ return `<img class="scene" draggable="false" alt="" src="${BGS[LOC_FOR[key]||'forest']}">`; }
 function forestScene(){
@@ -1305,7 +1312,7 @@ function variantOf(armor, shield){
 }
 function animVariant(armor){ return armor ? "armored" : "light"; }
 /* персонажи без собственного арта временно берут спрайт другого зверя */
-const SPRITE_ALIAS = {};
+const SPRITE_ALIAS = {sirozha:"grumhorn"};
 function sprKey(k){ return (ANIM.light && ANIM.light[k]) ? k : (SPRITE_ALIAS[k] || k); }
 function frameset(key, armor){
   const v=animVariant(!!armor); const k=sprKey(key);
