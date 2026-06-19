@@ -313,25 +313,79 @@ h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.02;letter-spacing
   72% {transform:translate(calc(var(--reach)*.45),1px) scale(.98,1.02)}
   100%{transform:translate(0,0) scale(1,1)}
 }
-/* СУПЕР-УДАР: высокий прыжок к сопернику */
+/* СУПЕР-УДАР: разбег + высокий прыжок к сопернику */
 .leap-l{animation:leap-l .68s cubic-bezier(.3,.62,.32,1) both;z-index:8}
 .leap-r{animation:leap-r .68s cubic-bezier(.3,.62,.32,1) both;z-index:8}
 @keyframes leap-l{
   0%  {transform:translate(0,0) scale(1,1)}
-  14% {transform:translate(-12px,5px) scale(1.1,.86)}                      /* глубокий присед */
-  36% {transform:translate(calc(var(--reach)*.6),-44px) scale(.9,1.12)}    /* прыжок (в кадре) */
-  56% {transform:translate(var(--reach),0) scale(1.05,.95)}                /* удар-приземление */
-  74% {transform:translate(calc(var(--reach)*.5),2px) scale(.97,1.03)}
+  10% {transform:translate(-11px,6px) scale(1.12,.84)}                     /* глубокий присед */
+  24% {transform:translate(calc(var(--reach)*.32),2px) scale(.98,1.04)}    /* разбег */
+  36% {transform:translate(calc(var(--reach)*.52),-50px) scale(.88,1.16)}  /* высокий прыжок */
+  50% {transform:translate(var(--reach),-34px) scale(.9,1.12)}             /* над целью */
+  58% {transform:translate(var(--reach),2px) scale(1.08,.92)}              /* слэм-контакт */
+  76% {transform:translate(calc(var(--reach)*.45),0) scale(.98,1.02)}
   100%{transform:translate(0,0) scale(1,1)}
 }
 @keyframes leap-r{
   0%  {transform:translate(0,0) scale(1,1)}
-  14% {transform:translate(12px,5px) scale(1.1,.86)}
-  36% {transform:translate(calc(var(--reach)*.6),-44px) scale(.9,1.12)}
-  56% {transform:translate(var(--reach),0) scale(1.05,.95)}
-  74% {transform:translate(calc(var(--reach)*.5),2px) scale(.97,1.03)}
+  10% {transform:translate(11px,6px) scale(1.12,.84)}
+  24% {transform:translate(calc(var(--reach)*.32),2px) scale(.98,1.04)}
+  36% {transform:translate(calc(var(--reach)*.52),-50px) scale(.88,1.16)}
+  50% {transform:translate(var(--reach),-34px) scale(.9,1.12)}
+  58% {transform:translate(var(--reach),2px) scale(1.08,.92)}
+  76% {transform:translate(calc(var(--reach)*.45),0) scale(.98,1.02)}
   100%{transform:translate(0,0) scale(1,1)}
 }
+/* --- ВАРИАТИВНЫЕ ПОДХОДЫ: разбег-наскок и двойной подскок --- */
+.runleap-l{animation:runleap-l .66s cubic-bezier(.3,.6,.32,1) both;z-index:7}
+.runleap-r{animation:runleap-r .66s cubic-bezier(.3,.6,.32,1) both;z-index:7}
+@keyframes runleap-l{
+  0%  {transform:translate(0,0) scale(1,1)}
+  10% {transform:translate(-7px,4px) scale(1.08,.88)}                      /* присед-разгон */
+  22% {transform:translate(calc(var(--reach)*.26),1px) scale(.98,1.04)}    /* шаг разбега */
+  32% {transform:translate(calc(var(--reach)*.5),4px) scale(1.04,.96)}     /* шаг (бобинг) */
+  42% {transform:translate(calc(var(--reach)*.62),-30px) scale(.9,1.12)}   /* отрыв в прыжок */
+  56% {transform:translate(var(--reach),-6px) scale(1.05,.95)}             /* контакт */
+  74% {transform:translate(calc(var(--reach)*.4),2px) scale(.98,1.02)}
+  100%{transform:translate(0,0) scale(1,1)}
+}
+@keyframes runleap-r{
+  0%  {transform:translate(0,0) scale(1,1)}
+  10% {transform:translate(7px,4px) scale(1.08,.88)}
+  22% {transform:translate(calc(var(--reach)*.26),1px) scale(.98,1.04)}
+  32% {transform:translate(calc(var(--reach)*.5),4px) scale(1.04,.96)}
+  42% {transform:translate(calc(var(--reach)*.62),-30px) scale(.9,1.12)}
+  56% {transform:translate(var(--reach),-6px) scale(1.05,.95)}
+  74% {transform:translate(calc(var(--reach)*.4),2px) scale(.98,1.02)}
+  100%{transform:translate(0,0) scale(1,1)}
+}
+.hop-l{animation:hop-l .66s cubic-bezier(.34,.6,.3,1) both;z-index:7}
+.hop-r{animation:hop-r .66s cubic-bezier(.34,.6,.3,1) both;z-index:7}
+@keyframes hop-l{
+  0%  {transform:translate(0,0) scale(1,1)}
+  10% {transform:translate(-5px,4px) scale(1.07,.9)}                       /* присед */
+  22% {transform:translate(calc(var(--reach)*.28),-16px) scale(.95,1.08)}  /* подскок 1 */
+  34% {transform:translate(calc(var(--reach)*.46),2px) scale(1.06,.94)}    /* приземление 1 */
+  44% {transform:translate(calc(var(--reach)*.66),-16px) scale(.95,1.08)}  /* подскок 2 */
+  56% {transform:translate(var(--reach),-2px) scale(1.04,.96)}             /* контакт */
+  74% {transform:translate(calc(var(--reach)*.4),0) scale(1,1)}
+  100%{transform:translate(0,0) scale(1,1)}
+}
+@keyframes hop-r{
+  0%  {transform:translate(0,0) scale(1,1)}
+  10% {transform:translate(5px,4px) scale(1.07,.9)}
+  22% {transform:translate(calc(var(--reach)*.28),-16px) scale(.95,1.08)}
+  34% {transform:translate(calc(var(--reach)*.46),2px) scale(1.06,.94)}
+  44% {transform:translate(calc(var(--reach)*.66),-16px) scale(.95,1.08)}
+  56% {transform:translate(var(--reach),-2px) scale(1.04,.96)}
+  74% {transform:translate(calc(var(--reach)*.4),0) scale(1,1)}
+  100%{transform:translate(0,0) scale(1,1)}
+}
+/* приседание-уклон (duck) */
+.duck-l{animation:duck-l .5s ease-out both;z-index:6}
+.duck-r{animation:duck-r .5s ease-out both;z-index:6}
+@keyframes duck-l{0%{transform:translate(0,0) scale(1,1)}40%{transform:translate(-10px,12px) scale(1.12,.78)}100%{transform:translate(0,0) scale(1,1)}}
+@keyframes duck-r{0%{transform:translate(0,0) scale(1,1)}40%{transform:translate(10px,12px) scale(1.12,.78)}100%{transform:translate(0,0) scale(1,1)}}
 /* --- замах и удар оружием (синхронно с наскоком, возврат в руку) --- */
 .swing-l{animation:swing-l .6s cubic-bezier(.3,.6,.3,1) both}
 .swing-r{animation:swing-r .6s cubic-bezier(.3,.6,.3,1) both}
@@ -1541,10 +1595,9 @@ function screenFight(hero,enemy,o,idx,sim){
         else { ecur-=e.dmg; setHP(hpR,hptR,ecur,emax); floatTxt("R","-"+e.dmg,"dmg"); }
         beep(140,0.18,"sawtooth",0.05);
       } else if(e.t==="dodge"){
-        const d = e.s==="L"?fL:fR;            // увернувшийся
-        d.style.transition="transform .14s";
-        d.style.transform=(e.s==="L"?"translateX(-20px)":"translateX(20px)")+" rotate("+(e.s==="L"?-10:10)+"deg)";
-        setTimeout(()=>{ d.style.transition="transform .25s"; d.style.transform=""; },260);
+        const d = e.s==="L"?fL:fR;            // увернувшийся пригибается (duck)
+        const dk = e.s==="L"?"duck-l":"duck-r";
+        d.classList.add(dk); setTimeout(()=>d.classList.remove(dk),500);
         floatTxt(e.s==="L"?"L":"R","уворот!","dmg dodge");
         beep(300,0.1,"sine",0.05);
       } else if(e.t==="miss"){ beep(220,0.12,"sine",0.04); }
@@ -1562,11 +1615,17 @@ function screenFight(hero,enemy,o,idx,sim){
     const heavy = isSpec || e.crit;
     comm.textContent=e.txt;
 
-    // подшаг к сопернику; на супер-ударе — высокий ПРЫЖОК
+    // подшаг к сопернику; на супер-ударе — разбег + высокий ПРЫЖОК, иначе случайный стиль наскока
     beep(540,0.06,"sine",0.04);
-    if(isSpec){ atkEl.classList.add(atkSide==="L"?"leap-l":"leap-r"); beep(720,0.1,"triangle",0.05);
+    let atkCls;
+    if(isSpec){ atkCls = atkSide==="L"?"leap-l":"leap-r"; beep(720,0.1,"triangle",0.05);
       if(atkShadow) atkShadow.classList.add("air"); }       // тень съёживается, пока боец в прыжке
-    else { atkEl.classList.add(atkSide==="L"?"jump-l":"jump-r"); }
+    else {
+      const styles = atkSide==="L" ? ["jump-l","runleap-l","hop-l"] : ["jump-r","runleap-r","hop-r"];
+      atkCls = styles[Math.floor(Math.random()*styles.length)];
+      if(atkCls.indexOf("hop")===0 || atkCls.indexOf("runleap")===0){ if(atkShadow) atkShadow.classList.add("air"); }
+    }
+    atkEl.classList.add(atkCls);
     // покадровая анимация атаки с оружием (кадры из архива; удар ~кадр 4)
     const atkImg = atkSide==="L"?imgL:imgR;
     const baseFrames = atkSide==="L"?framesL:framesR;
@@ -1602,7 +1661,7 @@ function screenFight(hero,enemy,o,idx,sim){
 
     // снять классы наскока и вернуть в стойку
     fightTimers.push(setTimeout(()=>{
-      atkEl.classList.remove("jump-l","jump-r","leap-l","leap-r");
+      atkEl.classList.remove("jump-l","jump-r","leap-l","leap-r","runleap-l","runleap-r","hop-l","hop-r");
       if(atkShadow) atkShadow.classList.remove("air");
       if(atkImg) atkImg.src=idleFrame;
     }, 700));
