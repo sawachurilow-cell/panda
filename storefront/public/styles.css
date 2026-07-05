@@ -72,6 +72,17 @@ button{font:inherit; color:inherit; cursor:pointer; border:none; background:none
 .primary{background:var(--accent); color:#20170a; font-weight:800; border-radius:14px; padding:16px; font-size:19px; width:100%}
 .primary.big{min-height:var(--tap)}
 .primary:disabled{opacity:.5}
+/* ---- Checkout form ---- */
+.checkout-sheet{padding:0; width:min(520px,94vw)}
+.form{padding:20px; display:flex; flex-direction:column; gap:14px}
+.form label{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--muted)}
+.req{color:var(--red)}
+.form input,.form textarea{font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line);
+  border-radius:12px; padding:15px; min-height:56px; resize:none}
+.form input:focus,.form textarea:focus{outline:none; border-color:var(--accent)}
+.form-error{background:rgba(214,80,58,.15); color:#f0917f; border-radius:10px; padding:12px; font-size:14px}
+.form-error[hidden]{display:none}
+
 .done-sheet{text-align:center}
 .done-emoji{font-size:64px; margin-bottom:10px}
 .done-sheet h2{font-size:26px; margin-bottom:8px}

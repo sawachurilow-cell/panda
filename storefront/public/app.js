@@ -176,26 +176,65 @@ function changeQty(sku, d) {
   renderCart();
 }
 
-async function checkout() {
+function cartTotal() {
+  let t = 0;
+  for (const it of state.cart.values()) t += (it.price || 0) * it.qty;
+  return t;
+}
+
+// «Оформить заказ» из корзины → открыть форму с данными клиента.
+function openCheckout() {
+  if (!state.cart.size) return;
+  closeOverlay('cart');
+  $('#checkout-total').textContent = money(cartTotal());
+  $('#form-error').hidden = true;
+  show('checkout-overlay');
+}
+
+async function submitOrder(e) {
+  e.preventDefault();
+  const form = e.target;
+  const customer = {
+    name: form.name.value.trim(),
+    phone: form.phone.value.trim(),
+    address: form.address.value.trim(),
+    comment: form.comment.value.trim(),
+  };
+  const err = $('#form-error');
+  if (!customer.name || !customer.phone || !customer.address) {
+    err.textContent = 'Заполните ФИО, телефон и адрес разгрузки.';
+    err.hidden = false;
+    return;
+  }
   const cart = [...state.cart.values()].map((it) => ({ sku: it.sku, qty: it.qty }));
-  $('#checkout-btn').disabled = true;
-  const res = await api.post('/api/orders', { cart });
-  if (res && res.ok) {
-    state.cart.clear();
-    updateCartBadge();
-    closeOverlay('cart');
-    $('#done-text').textContent = `Номер заказа: ${res.order.id}${res.demo ? ' (демо)' : ''}. Подойдите к кассе для оплаты.`;
-    show('done-overlay');
-  } else {
-    $('#checkout-btn').disabled = false;
-    alert('Не удалось оформить заказ. Попробуйте ещё раз.');
+  const btn = $('#submit-order');
+  btn.disabled = true;
+  try {
+    const res = await api.post('/api/orders', { cart, customer });
+    if (res && res.ok) {
+      state.cart.clear();
+      updateCartBadge();
+      closeOverlay('checkout');
+      form.reset();
+      $('#done-text').textContent = `Номер заказа: ${res.order.id}${res.demo ? ' (демо)' : ''}. Подойдите к кассе для оплаты.`;
+      show('done-overlay');
+    } else {
+      err.textContent = 'Не удалось оформить заказ. Попробуйте ещё раз.';
+      err.hidden = false;
+    }
+  } catch {
+    err.textContent = 'Ошибка связи. Попробуйте ещё раз.';
+    err.hidden = false;
+  } finally {
+    btn.disabled = false;
   }
 }
 
 // ---- Утилиты UI ----
 function wireGlobal() {
   $('#cart-btn').onclick = () => { renderCart(); show('cart-overlay'); };
-  $('#checkout-btn').onclick = checkout;
+  $('#checkout-btn').onclick = openCheckout;
+  $('#checkout-form').onsubmit = submitOrder;
   $('#done-btn').onclick = () => closeOverlay('done');
   document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => closeOverlay(b.dataset.close)));
   // Клик по фону оверлея — закрыть.

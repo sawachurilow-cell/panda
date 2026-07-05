@@ -43,6 +43,33 @@
   </aside>
 </div>
 
+<!-- Оформление: данные клиента -->
+<div class="overlay" id="checkout-overlay" hidden>
+  <div class="sheet checkout-sheet">
+    <div class="drawer-head">
+      <h2>Оформление заказа</h2>
+      <button class="close" data-close="checkout">✕</button>
+    </div>
+    <form id="checkout-form" class="form" novalidate>
+      <label><span class="cap">ФИО <span class="req">*</span></span>
+        <input name="name" type="text" autocomplete="name" placeholder="Иванов Иван Иванович" required>
+      </label>
+      <label><span class="cap">Телефон <span class="req">*</span></span>
+        <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000-00-00" required>
+      </label>
+      <label><span class="cap">Адрес разгрузки <span class="req">*</span></span>
+        <input name="address" type="text" placeholder="Город, улица, дом" required>
+      </label>
+      <label><span class="cap">Комментарий</span>
+        <textarea name="comment" rows="2" placeholder="Необязательно"></textarea>
+      </label>
+      <div class="form-error" id="form-error" hidden></div>
+      <div class="total-row"><span>К оплате</span><b id="checkout-total">0 ₽</b></div>
+      <button type="submit" class="primary big" id="submit-order">Отправить заказ</button>
+    </form>
+  </div>
+</div>
+
 <!-- Экран «спасибо» -->
 <div class="overlay" id="done-overlay" hidden>
   <div class="sheet done-sheet">
