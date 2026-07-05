@@ -28,6 +28,8 @@ const password = process.env.B2B_PASSWORD || '';
 
 export const config = {
   port: Number(process.env.PORT) || 3000,
+  // В проде за Nginx задавайте HOST=127.0.0.1, чтобы порт не торчал наружу.
+  host: process.env.HOST || '0.0.0.0',
 
   b2b: {
     domain: process.env.B2B_DOMAIN || 'b2b.i-t-p.pro',

@@ -27,7 +27,7 @@ app.use((err, _req, res, _next) => {
   res.status(502).json({ error: 'upstream_error' });
 });
 
-app.listen(config.port, () => {
+app.listen(config.port, config.host, () => {
   const mode = config.useMock ? 'ДЕМО (mockData, без B2B)' : `LIVE → ${config.b2b.domain}`;
-  console.log(`Витрина-киоск: http://localhost:${config.port}  | режим: ${mode}`);
+  console.log(`Витрина-киоск: http://${config.host}:${config.port}  | режим: ${mode}`);
 });
