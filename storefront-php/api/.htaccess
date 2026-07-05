@@ -1,0 +1,7 @@
+# Все /api/* (кроме реальных файлов) → фронт-контроллер index.php.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /api/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
