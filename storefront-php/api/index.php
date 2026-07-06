@@ -12,10 +12,14 @@ require __DIR__ . '/CatalogService.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Путь после /api/ → массив сегментов.
-$uri  = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-$path = preg_replace('#^.*/api/?#', '', $uri);
-$path = trim($path, '/');
+// Маршрут: из ?r= (работает без rewrite Nginx) либо из чистого пути после /api/.
+$route = isset($_GET['r']) ? (string) $_GET['r'] : '';
+if ($route === '') {
+    $uri   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $route = preg_replace('#^.*/api/?#', '', $uri);
+    $route = preg_replace('#^index\.php/?#', '', $route);
+}
+$path   = trim($route, '/');
 $parts  = $path === '' ? [] : explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 

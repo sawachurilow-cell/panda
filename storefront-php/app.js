@@ -1,10 +1,22 @@
 // Фронтенд киоска. Знает только наш бэкенд (/api/*), с B2B API не общается напрямую.
 'use strict';
 
+// Все вызовы идут через реальный PHP-файл с маршрутом в ?r= — работает на любом
+// Nginx+PHP-FPM без правки конфига. api('catalog/products', {category:5}) и т.п.
+const API = '/api/index.php?r=';
 const api = {
-  async get(url) { const r = await fetch(url); if (!r.ok) throw new Error(r.status); return r.json(); },
-  async post(url, body) {
-    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  url(route, params) {
+    let u = API + route;
+    if (params) for (const [k, v] of Object.entries(params)) u += `&${k}=${encodeURIComponent(v)}`;
+    return u;
+  },
+  async get(route, params) {
+    const r = await fetch(api.url(route, params));
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  },
+  async post(route, body) {
+    const r = await fetch(api.url(route), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     return r.json();
   },
 };
@@ -23,11 +35,11 @@ const initial = (name) => (name || '?').trim().charAt(0).toUpperCase();
 // ---- Загрузка ----
 async function boot() {
   try {
-    const health = await api.get('/api/health');
+    const health = await api.get('health');
     $('#mode-badge').textContent = health.mode === 'demo' ? 'демо-режим' : 'онлайн';
   } catch { /* бэкенд недоступен — покажем пустой каталог */ }
 
-  const { categories } = await api.get('/api/catalog/categories');
+  const { categories } = await api.get('catalog/categories');
   state.categories = flatten(categories);
   renderCats();
   await loadProducts(null);
@@ -71,8 +83,7 @@ function highlightCat() {
 async function loadProducts(category) {
   state.activeCategory = category;
   highlightCat();
-  const url = category ? `/api/catalog/products?category=${category}` : '/api/catalog/products';
-  const { products } = await api.get(url);
+  const { products } = await api.get('catalog/products', category ? { category } : null);
   state.products = products;
   renderGrid();
 }
@@ -108,7 +119,7 @@ function stockLabel(s) {
 
 // ---- Карточка товара ----
 async function openProduct(sku) {
-  const { product } = await api.get(`/api/catalog/product/${sku}`);
+  const { product } = await api.get(`catalog/product/${sku}`);
   let qty = 1;
   const sheet = $('#product-sheet');
   const img = product.images && product.images[0];
@@ -210,7 +221,7 @@ async function submitOrder(e) {
   const btn = $('#submit-order');
   btn.disabled = true;
   try {
-    const res = await api.post('/api/orders', { cart, customer });
+    const res = await api.post('orders', { cart, customer });
     if (res && res.ok) {
       state.cart.clear();
       updateCartBadge();
