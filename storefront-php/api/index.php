@@ -125,5 +125,7 @@ try {
     send(['error' => 'not_found'], 404);
 } catch (Throwable $e) {
     error_log('[storefront] ' . $e->getMessage());
-    send(['error' => 'upstream_error'], 502);
+    // Диагностика: ?debug=1 покажет реальную причину (убрать/не использовать в проде).
+    $debug = isset($_GET['debug']) && $_GET['debug'] === '1';
+    send($debug ? ['error' => 'upstream_error', 'detail' => $e->getMessage()] : ['error' => 'upstream_error'], 502);
 }
