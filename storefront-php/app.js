@@ -21,11 +21,15 @@ const api = {
   },
 };
 
+const LIMIT = 300; // сколько товаров грузим за раз (каталог большой)
+
 const state = {
-  categories: [],
-  activeCategory: null,
+  roots: [],        // категории верхнего уровня
+  parent: null,     // текущий узел углубления (null = корень)
+  path: [],         // стек углубления для кнопки «Назад»
   products: [],
-  cart: new Map(), // sku -> {sku, name, price, qty}
+  total: 0,
+  cart: new Map(),  // sku -> {sku, name, price, qty}
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -37,62 +41,109 @@ async function boot() {
   try {
     const health = await api.get('health');
     $('#mode-badge').textContent = health.mode === 'demo' ? 'демо-режим' : 'онлайн';
-  } catch { /* бэкенд недоступен — покажем пустой каталог */ }
+  } catch { /* бэкенд недоступен */ }
 
   const { categories } = await api.get('catalog/categories');
-  state.categories = flatten(categories);
+  state.roots = categories || [];
   renderCats();
-  await loadProducts(null);
+  showHint();     // товары не грузим сразу — каталог огромный, ждём выбора
   wireGlobal();
 }
 
-// Дерево категорий → плоский список листовых для чипов.
-function flatten(tree, acc = []) {
-  for (const c of tree || []) {
-    acc.push({ id: c.id, name: c.name });
-    if (c.childrens && c.childrens.length) flatten(c.childrens, acc);
-  }
-  return acc;
-}
-
+// ---- Категории: чипы с углублением ----
 function renderCats() {
   const el = $('#cats');
   el.innerHTML = '';
-  const all = chip('Все', null);
-  el.appendChild(all);
-  for (const c of state.categories) el.appendChild(chip(c.name, c.id));
-  highlightCat();
+  el.appendChild(chip('🏠 Каталог', goHome, 'home'));
+  if (state.path.length) el.appendChild(chip('← Назад', goBack, 'back'));
+
+  const level = state.parent ? (state.parent.childrens || []) : state.roots;
+  for (const node of level) el.appendChild(chip(node.name, () => openCategory(node)));
 }
 
-function chip(label, id) {
+function chip(label, onClick, extra) {
   const b = document.createElement('button');
-  b.className = 'chip';
+  b.className = 'chip' + (extra ? ' ' + extra : '');
   b.textContent = label;
-  b.dataset.cat = id == null ? '' : id;
-  b.onclick = () => loadProducts(id);
+  b.onclick = onClick;
   return b;
 }
 
-function highlightCat() {
-  document.querySelectorAll('.chip').forEach((ch) => {
-    const id = ch.dataset.cat === '' ? null : Number(ch.dataset.cat);
-    ch.classList.toggle('active', id === state.activeCategory);
-  });
+function goHome() {
+  state.parent = null;
+  state.path = [];
+  clearSearch();
+  renderCats();
+  showHint();
 }
 
-async function loadProducts(category) {
-  state.activeCategory = category;
-  highlightCat();
-  const { products } = await api.get('catalog/products', category ? { category } : null);
-  state.products = products;
+function goBack() {
+  state.path.pop();
+  state.parent = state.path[state.path.length - 1] || null;
+  renderCats();
+  if (state.parent) loadProducts({ category: state.parent.id, catName: state.parent.name });
+  else showHint();
+}
+
+// Тап по категории: показать её товары (с вложенными) и, если есть подкатегории, углубиться.
+function openCategory(node) {
+  clearSearch();
+  loadProducts({ category: node.id, catName: node.name });
+  if (node.childrens && node.childrens.length) {
+    state.parent = node;
+    state.path.push(node);
+    renderCats();
+  }
+}
+
+// ---- Загрузка и отрисовка товаров ----
+async function loadProducts({ category = null, q = '', catName = '' } = {}) {
+  const params = { limit: LIMIT };
+  if (category) params.category = category;
+  if (q) params.q = q;
+  const data = await api.get('catalog/products', params);
+  state.products = data.products || [];
+  state.total = data.total || 0;
   renderGrid();
+  renderInfo({ q, catName, shown: data.shown || 0, total: state.total });
 }
 
 function renderGrid() {
   const grid = $('#grid');
   grid.querySelectorAll('.pcard').forEach((n) => n.remove());
-  $('#grid-empty').hidden = state.products.length > 0;
+  const empty = $('#grid-empty');
+  if (!state.products.length) {
+    empty.hidden = false;
+    empty.textContent = 'Ничего не найдено';
+  } else {
+    empty.hidden = true;
+  }
   for (const p of state.products) grid.appendChild(productCard(p));
+}
+
+function renderInfo({ q, catName, shown, total }) {
+  const el = $('#catinfo');
+  let txt = '';
+  if (q) txt = `Поиск «${q}»: найдено ${total}`;
+  else if (catName) txt = `${catName}: ${total} товаров`;
+  if (total > shown) txt += ` · показаны первые ${shown} — уточните категорию или поиск`;
+  el.textContent = txt;
+  el.hidden = !txt;
+}
+
+function showHint() {
+  state.products = [];
+  state.total = 0;
+  $('#grid').querySelectorAll('.pcard').forEach((n) => n.remove());
+  const empty = $('#grid-empty');
+  empty.hidden = false;
+  empty.textContent = 'Выберите категорию или воспользуйтесь поиском';
+  $('#catinfo').hidden = true;
+}
+
+function clearSearch() {
+  const s = $('#search');
+  if (s) s.value = '';
 }
 
 function productCard(p) {
@@ -243,6 +294,22 @@ async function submitOrder(e) {
 
 // ---- Утилиты UI ----
 function wireGlobal() {
+  // Поиск по названию (с задержкой, минимум 2 символа).
+  const search = $('#search');
+  let t;
+  search.oninput = () => {
+    clearTimeout(t);
+    const q = search.value.trim();
+    t = setTimeout(() => {
+      if (q.length === 0) { goHome(); return; }
+      if (q.length < 2) return;
+      state.parent = null;
+      state.path = [];
+      renderCats();
+      loadProducts({ q });
+    }, 350);
+  };
+
   $('#cart-btn').onclick = () => { renderCart(); show('cart-overlay'); };
   $('#checkout-btn').onclick = openCheckout;
   $('#checkout-form').onsubmit = submitOrder;

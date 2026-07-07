@@ -72,23 +72,74 @@ final class CatalogService
         ];
     }
 
-    // Список товаров, опционально по категории. Только те, что есть в наличии.
-    public static function listProducts(?int $category = null): array
+    // id категории → все id её потомков (включая саму). Товары лежат в листовых
+    // категориях, поэтому фильтр по «ветке» должен раскрываться до листьев.
+    private static function categoryDescendants(int $id): array
+    {
+        $children = [];
+        $walk = function ($nodes) use (&$walk, &$children) {
+            foreach ($nodes as $n) {
+                $kids = $n['childrens'] ?? [];
+                $children[(int) $n['id']] = array_map(fn($k) => (int) $k['id'], $kids);
+                if ($kids) {
+                    $walk($kids);
+                }
+            }
+        };
+        $walk(self::categories());
+
+        $out = [];
+        $stack = [$id];
+        while ($stack) {
+            $c = array_pop($stack);
+            if (isset($out[$c])) {
+                continue;
+            }
+            $out[$c] = true;
+            foreach ($children[$c] ?? [] as $k) {
+                $stack[] = $k;
+            }
+        }
+        return $out; // ключи-множество: [id => true, ...]
+    }
+
+    /**
+     * Товары в наличии: по категории (с вложенными) и/или поиску по названию.
+     * Возвращает ['total' => сколько всего подходит, 'items' => срез limit/offset].
+     */
+    public static function listProducts(?int $category = null, ?string $q = null, int $limit = 300, int $offset = 0): array
     {
         $products = self::productIndex();
         $active   = self::activeIndex();
-        $items = [];
+
+        $allowed = $category ? self::categoryDescendants($category) : null;
+        $needle  = ($q !== null && trim($q) !== '') ? trim($q) : '';
+        // Регистронезависимый поиск, устойчивый к отсутствию расширения mbstring.
+        $hasMb = function_exists('mb_stripos');
+
+        $matched = [];
         foreach ($active as $sku => $a) {
             if (!isset($products[$sku])) {
                 continue;
             }
             $p = $products[$sku];
-            if ($category && (int) ($p['category'] ?? 0) !== $category) {
+            if ($allowed !== null && !isset($allowed[(int) ($p['category'] ?? 0)])) {
                 continue;
             }
-            $items[] = self::toDisplay($p, $a);
+            if ($needle !== '') {
+                $name = (string) ($p['name'] ?? '');
+                $found = $hasMb ? (mb_stripos($name, $needle) !== false) : (stripos($name, $needle) !== false);
+                if (!$found) {
+                    continue;
+                }
+            }
+            $matched[] = [$p, $a];
         }
-        return $items;
+
+        $total = count($matched);
+        $slice = array_slice($matched, max(0, $offset), max(1, $limit));
+        $items = array_map(fn($pa) => self::toDisplay($pa[0], $pa[1]), $slice);
+        return ['total' => $total, 'items' => $items];
     }
 
     // Карточка товара с картинками (если есть).

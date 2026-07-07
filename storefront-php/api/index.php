@@ -111,9 +111,12 @@ try {
         send(['categories' => CatalogService::categories()]);
     }
     if ($method === 'GET' && $parts === ['catalog', 'products']) {
-        $cat = isset($_GET['category']) ? (int) $_GET['category'] : null;
-        $items = CatalogService::listProducts($cat);
-        send(['products' => $items, 'total' => count($items)]);
+        $cat    = isset($_GET['category']) ? (int) $_GET['category'] : null;
+        $q      = isset($_GET['q']) ? (string) $_GET['q'] : null;
+        $limit  = isset($_GET['limit']) ? max(1, min(500, (int) $_GET['limit'])) : 300;
+        $offset = isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : 0;
+        $res = CatalogService::listProducts($cat, $q, $limit, $offset);
+        send(['products' => $res['items'], 'total' => $res['total'], 'shown' => count($res['items'])]);
     }
     if ($method === 'GET' && count($parts) === 3 && $parts[0] === 'catalog' && $parts[1] === 'product') {
         $card = CatalogService::getProduct((int) $parts[2]);

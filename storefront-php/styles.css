@@ -16,6 +16,13 @@ button{font:inherit; color:inherit; cursor:pointer; border:none; background:none
 /* ---- Topbar ---- */
 .topbar{display:flex; align-items:center; gap:16px; padding:14px 22px; background:var(--card); border-bottom:1px solid var(--line)}
 .brand{font-size:26px; font-weight:800; letter-spacing:.5px}
+.search{flex:1; max-width:520px; min-height:52px; font:inherit; font-size:17px; color:var(--ink);
+  background:var(--bg); border:1px solid var(--line); border-radius:99px; padding:12px 22px}
+.search:focus{outline:none; border-color:var(--accent)}
+.catinfo{padding:10px 22px; color:var(--muted); font-size:14px; background:var(--bg); border-bottom:1px solid var(--line)}
+.catinfo[hidden]{display:none}
+.chip.back{background:transparent; border-style:dashed}
+.chip.home{background:var(--bg)}
 .mode{font-size:12px; color:var(--muted); padding:3px 10px; border:1px solid var(--line); border-radius:99px}
 .cart-btn{margin-left:auto; font-size:22px; background:var(--accent); color:#20170a; font-weight:800;
   border-radius:99px; padding:12px 22px; display:flex; align-items:center; gap:8px; min-height:var(--tap)}

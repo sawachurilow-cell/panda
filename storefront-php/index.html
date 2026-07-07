@@ -10,6 +10,7 @@
 <div id="app">
   <header class="topbar">
     <div class="brand">Витрина</div>
+    <input class="search" id="search" type="search" placeholder="Поиск товаров…" autocomplete="off" enterkeyhint="search">
     <div class="mode" id="mode-badge"></div>
     <button class="cart-btn" id="cart-btn" aria-label="Корзина">
       🛒 <span class="cart-count" id="cart-count">0</span>
@@ -17,9 +18,10 @@
   </header>
 
   <nav class="cats" id="cats"></nav>
+  <div class="catinfo" id="catinfo" hidden></div>
 
   <main class="grid" id="grid">
-    <div class="empty" id="grid-empty" hidden>Нет товаров в наличии</div>
+    <div class="empty" id="grid-empty">Выберите категорию или воспользуйтесь поиском</div>
   </main>
 </div>
 
