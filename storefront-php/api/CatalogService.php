@@ -19,16 +19,15 @@ final class CatalogService
         });
     }
 
-    // Принудительный прогрев кэша (для CRON): собрать всё в обход TTL.
-    // Тяжёлая операция — вызывать в фоне по расписанию, не на запросе пользователя.
+    // Прогрев кэша для CRON. Часто обновляем только цены/остатки (active, лимит
+    // 10/час), а справочник товаров и категории — по TTL (раз в сутки; статика
+    // товаров лимитирована 2/час). Тяжёлое — в фоне, не на запросе пользователя.
     public static function warm(): array
     {
-        Cache::invalidate('categories');
-        Cache::invalidate('products');
-        Cache::invalidate('active');
-        $c = self::categories();
-        $p = self::productIndex();
-        $a = self::activeIndex();
+        Cache::invalidate('active');       // цены/остатки — пересобрать
+        $c = self::categories();           // соберётся только если протухло (TTL сутки)
+        $p = self::productIndex();          // то же
+        $a = self::activeIndex();           // пересоберётся (инвалидировали выше)
         return ['ok' => true, 'categories' => is_array($c) ? count($c) : 0, 'products' => count($p), 'active' => count($a)];
     }
 
