@@ -29,6 +29,8 @@ define('CONFIG', [
     // Нет учётки → демо-режим на mock.php (без обращений к B2B).
     'useMock'        => !($login && $password),
     'markup'         => (float) $val('RETAIL_MARKUP_PERCENT', '0'),
+    // Необязательный ключ для ?r=refresh (если задан — CRON зовёт с ?key=...).
+    'refreshKey'     => $val('REFRESH_KEY'),
     // TTL кэша в секундах (в .env заданы в мс, как у Node-версии).
     'catalogTtl'     => (int) ((int) $val('CACHE_CATALOG_MS', '86400000') / 1000),
     'pricesTtl'      => (int) ((int) $val('CACHE_PRICES_MS', '600000') / 1000),

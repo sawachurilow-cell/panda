@@ -19,6 +19,19 @@ final class CatalogService
         });
     }
 
+    // Принудительный прогрев кэша (для CRON): собрать всё в обход TTL.
+    // Тяжёлая операция — вызывать в фоне по расписанию, не на запросе пользователя.
+    public static function warm(): array
+    {
+        Cache::invalidate('categories');
+        Cache::invalidate('products');
+        Cache::invalidate('active');
+        $c = self::categories();
+        $p = self::productIndex();
+        $a = self::activeIndex();
+        return ['ok' => true, 'categories' => is_array($c) ? count($c) : 0, 'products' => count($p), 'active' => count($a)];
+    }
+
     // Справочник товаров: sku => карточка. Храним только нужные поля — иначе на
     // 120k товаров индекс раздувает память (barcodes/weight/volume тяжёлые).
     private static function productIndex(): array

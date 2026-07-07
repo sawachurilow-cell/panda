@@ -112,6 +112,13 @@ try {
     if ($parts === ['health']) {
         send(['ok' => true, 'mode' => CONFIG['useMock'] ? 'demo' : 'live']);
     }
+    // Прогрев кэша для CRON. Если задан REFRESH_KEY — требуем ?key=...
+    if ($parts === ['refresh']) {
+        if (CONFIG['refreshKey'] !== '' && ($_GET['key'] ?? '') !== CONFIG['refreshKey']) {
+            send(['error' => 'forbidden'], 403);
+        }
+        send(CatalogService::warm());
+    }
     if ($method === 'GET' && $parts === ['catalog', 'categories']) {
         send(['categories' => CatalogService::categories()]);
     }
