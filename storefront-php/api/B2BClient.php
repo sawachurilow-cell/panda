@@ -26,28 +26,62 @@ final class B2BClient
         file_put_contents($this->sessionFile, $s);
     }
 
-    // --- Низкоуровневый POST JSON ---
-    private function httpPost(string $url, string $json, array $headers = [])
+    // --- Низкоуровневый HTTP: cURL, а при его отсутствии — потоки (file_get_contents).
+    // Возвращает [int $code, string $body]. Бросает при транспортной ошибке. ---
+    private function httpRaw(string $url, ?string $postJson, array $headers): array
     {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $json,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => array_merge(['Content-Type: application/json'], $headers),
-            CURLOPT_TIMEOUT        => 30,
-        ]);
-        $res  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
-        curl_close($ch);
-        if ($res === false) {
-            throw new RuntimeException("curl: $err");
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            $opts = [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_HTTPHEADER     => $headers,
+            ];
+            if ($postJson !== null) {
+                $opts[CURLOPT_POST] = true;
+                $opts[CURLOPT_POSTFIELDS] = $postJson;
+            }
+            curl_setopt_array($ch, $opts);
+            $body = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err  = curl_error($ch);
+            curl_close($ch);
+            if ($body === false) {
+                throw new RuntimeException("curl: $err");
+            }
+            return [(int) $code, (string) $body];
         }
+
+        // Фолбэк без ext-curl: HTTP через потоки (нужен allow_url_fopen=On).
+        $http = [
+            'method'        => $postJson !== null ? 'POST' : 'GET',
+            'header'        => implode("\r\n", $headers),
+            'timeout'       => 60,
+            'ignore_errors' => true, // получить тело и при 4xx/5xx
+        ];
+        if ($postJson !== null) {
+            $http['content'] = $postJson;
+        }
+        $body = @file_get_contents($url, false, stream_context_create(['http' => $http]));
+        if ($body === false) {
+            throw new RuntimeException('HTTP request failed (нет ни ext-curl, ни allow_url_fopen)');
+        }
+        $code = 0;
+        if (isset($http_response_header[0]) && preg_match('#\s(\d{3})\s#', $http_response_header[0], $m)) {
+            $code = (int) $m[1];
+        }
+        return [$code, (string) $body];
+    }
+
+    // POST/GET JSON с проверкой статуса. Content-Type добавляется для POST автоматически.
+    private function httpJson(string $url, ?string $postJson, array $headers = [])
+    {
+        $headers = array_merge($postJson !== null ? ['Content-Type: application/json'] : [], $headers);
+        [$code, $body] = $this->httpRaw($url, $postJson, $headers);
         if ($code < 200 || $code >= 300) {
             throw new RuntimeException("B2B HTTP $code");
         }
-        return json_decode($res, true);
+        return json_decode($body, true);
     }
 
     // --- JSON-RPC на /api/2 с подстановкой сессии и повтором при протухании ---
@@ -59,7 +93,7 @@ final class B2BClient
             }
             $payload['session'] = $this->session;
         }
-        $json = $this->httpPost(CONFIG['baseUrl'] . '/api/2', json_encode($payload));
+        $json = $this->httpJson(CONFIG['baseUrl'] . '/api/2', json_encode($payload));
 
         if (is_array($json) && isset($json['success']) && $json['success'] === false
             && $withSession && !$this->retried) {
@@ -77,7 +111,7 @@ final class B2BClient
     // --- 2.1 Аутентификация ---
     public function login(): string
     {
-        $json = $this->httpPost(CONFIG['baseUrl'] . '/api/2', json_encode([
+        $json = $this->httpJson(CONFIG['baseUrl'] . '/api/2', json_encode([
             'data'    => ['login' => CONFIG['login'], 'password' => CONFIG['password']],
             'request' => ['method' => 'login', 'model' => 'auth', 'module' => 'quickfox'],
         ]));
@@ -102,22 +136,14 @@ final class B2BClient
         if (!$this->session) {
             $this->login();
         }
-        $ch = curl_init(CONFIG['baseUrl'] . $path);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => ['Cookie: session=' . $this->session],
-            CURLOPT_TIMEOUT        => 60,
-        ]);
-        $res  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        [$code, $body] = $this->httpRaw(CONFIG['baseUrl'] . $path, null, ['Cookie: session=' . $this->session]);
         if ($code === 404) {
             throw new RuntimeException("B2B static 404 (авторизация?) $path");
         }
-        if ($res === false || $code < 200 || $code >= 300) {
+        if ($code < 200 || $code >= 300) {
             throw new RuntimeException("B2B static HTTP $code $path");
         }
-        return json_decode($res, true);
+        return json_decode($body, true);
     }
 
     // --- 3.1 / 3.2 Каталог ---
