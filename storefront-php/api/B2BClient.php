@@ -34,7 +34,7 @@ final class B2BClient
             $ch = curl_init($url);
             $opts = [
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_TIMEOUT        => 120,
                 CURLOPT_HTTPHEADER     => $headers,
             ];
             if ($postJson !== null) {
@@ -56,7 +56,7 @@ final class B2BClient
         $http = [
             'method'        => $postJson !== null ? 'POST' : 'GET',
             'header'        => implode("\r\n", $headers),
-            'timeout'       => 60,
+            'timeout'       => 120,
             'ignore_errors' => true, // получить тело и при 4xx/5xx
         ];
         if ($postJson !== null) {

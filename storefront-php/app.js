@@ -101,11 +101,20 @@ async function loadProducts({ category = null, q = '', catName = '' } = {}) {
   const params = { limit: LIMIT };
   if (category) params.category = category;
   if (q) params.q = q;
-  const data = await api.get('catalog/products', params);
-  state.products = data.products || [];
-  state.total = data.total || 0;
-  renderGrid();
-  renderInfo({ q, catName, shown: data.shown || 0, total: state.total });
+  try {
+    const data = await api.get('catalog/products', params);
+    state.products = data.products || [];
+    state.total = data.total || 0;
+    renderGrid();
+    renderInfo({ q, catName, shown: data.shown || 0, total: state.total });
+  } catch (e) {
+    state.products = [];
+    $('#grid').querySelectorAll('.pcard').forEach((n) => n.remove());
+    const empty = $('#grid-empty');
+    empty.hidden = false;
+    empty.textContent = 'Не удалось загрузить товары. Обновите страницу или выберите другую категорию.';
+    $('#catinfo').hidden = true;
+  }
 }
 
 function renderGrid() {

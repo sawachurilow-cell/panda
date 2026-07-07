@@ -19,27 +19,52 @@ final class CatalogService
         });
     }
 
-    // Справочник товаров: sku => карточка.
+    // Справочник товаров: sku => карточка. Храним только нужные поля — иначе на
+    // 120k товаров индекс раздувает память (barcodes/weight/volume тяжёлые).
     private static function productIndex(): array
     {
         return Cache::getOrLoad('products', CONFIG['catalogTtl'], function () {
             $list = CONFIG['useMock'] ? mock_products() : self::client()->getProducts();
             $bySku = [];
             foreach ($list as $p) {
-                $bySku[(int) $p['sku']] = $p;
+                $sku = (int) ($p['sku'] ?? 0);
+                if (!$sku) {
+                    continue;
+                }
+                $bySku[$sku] = [
+                    'sku'          => $sku,
+                    'name'         => $p['name'] ?? '',
+                    'category'     => (int) ($p['category'] ?? 0),
+                    'part'         => $p['part'] ?? '',
+                    'vendor'       => $p['vendor'] ?? '',
+                    'rrp'          => $p['rrp'] ?? null,
+                    'warranty'     => $p['warranty'] ?? '',
+                    'has_image'    => !empty($p['has_image']),
+                    'multiplicity' => $p['multiplicity'] ?? 1,
+                ];
             }
             return $bySku;
         });
     }
 
-    // Наличие/цены: sku => данные.
+    // Наличие/цены: sku => данные. Тоже только нужные поля.
     private static function activeIndex(): array
     {
         return Cache::getOrLoad('active', CONFIG['pricesTtl'], function () {
             $list = CONFIG['useMock'] ? mock_active() : self::client()->getActiveProducts();
             $bySku = [];
             foreach ($list as $a) {
-                $bySku[(int) $a['sku']] = $a;
+                $sku = (int) ($a['sku'] ?? 0);
+                if (!$sku) {
+                    continue;
+                }
+                $bySku[$sku] = [
+                    'sku'           => $sku,
+                    'price'         => $a['price'] ?? null,
+                    'qty'           => $a['qty'] ?? null,
+                    'delivery_days' => $a['delivery_days'] ?? 0,
+                    'multiplicity'  => $a['multiplicity'] ?? 1,
+                ];
             }
             return $bySku;
         });

@@ -3,6 +3,11 @@
 // Аналог server/index.js + routes/* из Node-версии.
 define('STOREFRONT', true);
 
+// Реальный каталог большой (120k+ товаров): разбор JSON и построение индексов
+// требует памяти и времени. Поднимаем лимиты для этого запроса.
+@ini_set('memory_limit', '512M');
+@set_time_limit(120);
+
 require __DIR__ . '/config.php';
 require __DIR__ . '/Cache.php';
 require __DIR__ . '/pricing.php';
