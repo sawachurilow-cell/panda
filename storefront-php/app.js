@@ -38,15 +38,23 @@ const initial = (name) => (name || '?').trim().charAt(0).toUpperCase();
 
 // ---- Загрузка ----
 async function boot() {
+  let ready = true;
   try {
     const health = await api.get('health');
     $('#mode-badge').textContent = health.mode === 'demo' ? 'демо-режим' : 'онлайн';
+    ready = health.ready !== false;
   } catch { /* бэкенд недоступен */ }
 
   const { categories } = await api.get('catalog/categories');
   state.roots = categories || [];
   renderCats();
-  showHint();     // товары не грузим сразу — каталог огромный, ждём выбора
+  if (ready) {
+    showHint();   // товары не грузим сразу — каталог большой, ждём выбора
+  } else {
+    const empty = $('#grid-empty');
+    empty.hidden = false;
+    empty.textContent = 'Каталог обновляется, загляните через пару минут.';
+  }
   wireGlobal();
 }
 
@@ -178,8 +186,9 @@ function stockLabel(s) {
 }
 
 // ---- Карточка товара ----
-async function openProduct(sku) {
-  const { product } = await api.get(`catalog/product/${sku}`);
+function openProduct(sku) {
+  const product = state.products.find((p) => p.sku === sku);
+  if (!product) return;
   let qty = 1;
   const sheet = $('#product-sheet');
   const img = product.images && product.images[0];

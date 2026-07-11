@@ -3,16 +3,17 @@
 // Аналог server/index.js + routes/* из Node-версии.
 define('STOREFRONT', true);
 
-// Реальный каталог большой (120k+ товаров): разбор JSON и построение индексов
-// требует памяти и времени. Поднимаем лимиты для этого запроса.
-@ini_set('memory_limit', '512M');
-@set_time_limit(120);
+// Веб только читает готовые шарды каталога — память нужна небольшая.
+// Тяжёлую сборку выполняет CLI/CRON (api/warm.php), не веб-запрос.
+@ini_set('memory_limit', '128M');
+@set_time_limit(30);
 
 require __DIR__ . '/config.php';
 require __DIR__ . '/Cache.php';
 require __DIR__ . '/pricing.php';
 require __DIR__ . '/mock.php';
 require __DIR__ . '/B2BClient.php';
+require __DIR__ . '/Catalog.php';
 require __DIR__ . '/CatalogService.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -110,7 +111,7 @@ function order_create(): void
 // --- Маршрутизация ---
 try {
     if ($parts === ['health']) {
-        send(['ok' => true, 'mode' => CONFIG['useMock'] ? 'demo' : 'live']);
+        send(['ok' => true, 'mode' => CONFIG['useMock'] ? 'demo' : 'live', 'ready' => Catalog::isReady()]);
     }
     // Прогрев кэша для CRON. Если задан REFRESH_KEY — требуем ?key=...
     if ($parts === ['refresh']) {

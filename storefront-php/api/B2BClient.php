@@ -157,6 +157,29 @@ final class B2BClient
         return $this->fetchStatic($this->catalogFile('products'));
     }
 
+    // Сырое тело статики товаров (для потоковой сборки, без декодирования в память).
+    public function getProductsRaw(): string
+    {
+        if (!$this->session) { $this->login(); }
+        [$code, $body] = $this->httpRaw(CONFIG['baseUrl'] . $this->catalogFile('products'), null, ['Cookie: session=' . $this->session]);
+        if ($code === 404) { throw new RuntimeException('B2B static 404 (авторизация?) products'); }
+        if ($code < 200 || $code >= 300) { throw new RuntimeException("B2B static HTTP $code products"); }
+        return $body;
+    }
+
+    // Сырое тело ответа get_active_products (для потокового разбора).
+    public function getActiveRaw(): string
+    {
+        if (!$this->session) { $this->login(); }
+        $payload = [
+            'request' => ['method' => 'get_active_products', 'model' => 'client_api', 'module' => 'platform'],
+            'session' => $this->session,
+        ];
+        [$code, $body] = $this->httpRaw(CONFIG['baseUrl'] . '/api/2', json_encode($payload), ['Content-Type: application/json']);
+        if ($code < 200 || $code >= 300) { throw new RuntimeException("B2B HTTP $code active"); }
+        return $body;
+    }
+
     // --- 3.3 Наличие и цены ---
     public function getActiveProducts(array $filter = []): array
     {
